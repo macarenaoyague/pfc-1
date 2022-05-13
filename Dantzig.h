@@ -30,10 +30,6 @@ private:
         return S.find(t) == S.end();
     }
 
-    weightType C(vertexIndex c, vertexIndex t){
-        return findVertex(c)->edgesMAP[t];
-    }
-
     bool insertNextUsefulU(vertexIndex uIdx) {
         Vertex* c = findVertex(uIdx);
         vertexIndex tIdx;
@@ -80,8 +76,9 @@ private:
         pwvv t;
         weightType weightT;
         vertexIndex vertexC, vertexT;
-
+        int i = 0;
         while(S.size() < limit) {
+            i++;
             if (edgeT.empty()) break;
             t = edgeT.top();
             edgeT.pop();
@@ -103,6 +100,7 @@ private:
                     insertNextUsefulEdge(uVertex);
             }
         }
+        cout << "pops=" << i << endl;
         return D;
     }
 

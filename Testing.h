@@ -33,6 +33,8 @@ void dijkstra(int graph[V][V], int src, vector<int>& dist) {
 
 void Testing(int idx) {
 
+    cout << "Probando i=" << idx << endl;
+
     vector<int> dist(9);
     int graph1[V][V] = { { 0, 4, 0, 0, 0, 0, 0, 8, 0 },
                         { 4, 0, 8, 0, 0, 0, 0, 11, 0 },
@@ -67,7 +69,6 @@ void Testing(int idx) {
         for (auto e: p) {
             graph.insertEdge(i, e.second, e.first);
         }
-        cout << endl;
     }
 
     Dantzig dantzig(&graph);
@@ -75,13 +76,13 @@ void Testing(int idx) {
     // cout << "dantzig: " << endl;
     // dantzig.print();
     
-    cout << "Probando i=" << idx << endl;
     bool funciona = true;
     for (int i = 0; i < V; i++) {
         if (dist[i] != dantzigAns[i]) {
-            cout << dist[i] << "!=" << dantzigAns[i] << endl;
+            cout << i << ": " << dist[i] << "!=" << dantzigAns[i] << endl;
             funciona = false;
         }
     }
     if (funciona) cout << "SUCCESS";
+    cout << endl;
 }
