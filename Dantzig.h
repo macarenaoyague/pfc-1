@@ -34,10 +34,28 @@ private:
         return findVertex(c)->edgesMAP[t];
     }
 
+    bool insertNextUsefulU(vertexIndex uIdx) {
+        Vertex* c = findVertex(uIdx);
+        vertexIndex tIdx;
+        if (c == nullptr) return false;
+        for (auto edge: c->edges) {
+            tIdx = edge->end;
+            if (isUseful(tIdx)) {
+                if (mapT.find(tIdx) == mapT.end()) {
+                    vector<vertexIndex> v;
+                    mapT[tIdx] = v;
+                };
+                mapT[tIdx].push_back(uIdx);
+                edgeT.push({D[uIdx]+edge->weight, {uIdx, tIdx}});
+                return true;
+            } 
+        }
+        return false;
+    }
+
     bool insertNextUsefulEdge(vertexIndex cIdx) {
         Vertex* c = findVertex(cIdx);
         vertexIndex tIdx;
-        cout << cIdx << ": ";
         if (c == nullptr) return false;
         for (auto edge: c->edges) {
             tIdx = edge->end;
@@ -47,13 +65,13 @@ private:
                     mapT[tIdx] = v;
                 };
                 mapT[tIdx].push_back(cIdx);
-                cout << "si con " << tIdx << " y w " << D[cIdx]+edge->weight << endl;
                 //w, c, t
                 edgeT.push({D[cIdx]+edge->weight, {cIdx, tIdx}});
                 return true;
-            } 
+            } else {
+                insertNextUsefulU(tIdx);
+            }
         }
-        cout << "no" << endl;
         return false;
     }
 
@@ -67,13 +85,10 @@ private:
             if (edgeT.empty()) break;
             t = edgeT.top();
             edgeT.pop();
-            cout << "top" << endl;
-            cout << "w: " << t.first << ", c: " << t.second.first << ", t: " << t.second.second << endl;
             int i = 0;
             while(!isUseful(t.second.second)){
                 i++;
                 if (i == 10) return;
-                cout << "hola";
                 if(edgeT.empty()) break;
                 t = edgeT.top();
                 edgeT.pop();
@@ -86,13 +101,10 @@ private:
             if (S.size() == limit) break;
             insertNextUsefulEdge(vertexT);
             vector<vertexIndex> u = mapT[vertexT];
-            cout << "list de t: ";
             for(vertexIndex uVertex: u) {
-                cout << uVertex << " ";
                 if (uVertex != vertexC)
                     insertNextUsefulEdge(uVertex);
             }
-            cout << endl;
         }
     }
 
@@ -112,7 +124,6 @@ public:
     }
 
     void print() {
-        cout << D.size();
         for (auto e: D)
             cout << e.first << ": " << e.second << endl;
     }
