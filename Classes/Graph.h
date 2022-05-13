@@ -1,52 +1,5 @@
-#include <iostream>
-#include <vector>
-#include <unordered_map>
-#include <map>
-#include <algorithm>
-using namespace std;
-
-typedef unsigned vertexIndex;
-typedef unsigned weightType;
-
-class Edge {
-public:
-    vertexIndex start;
-    vertexIndex end;
-    weightType weight;
-    
-    Edge(): start(0), end(0), weight(-1){}
-    Edge(vertexIndex _start, vertexIndex _end, weightType _weight):
-        start(_start), end(_end), weight(_weight){}
-};
-
-class Vertex {
-public:
-
-    // refactor, cambiar las edges a aestto
-    map <vertexIndex, weightType> edgesMAP;
-    
-    vector<Edge*> edges;
-    vertexIndex idx;
-    
-    Vertex(){}
-    Vertex(vertexIndex _idx): idx(_idx){}
-    void addEdge(Edge* edge){
-        edges.push_back(edge);
-    }
-
-    /*
-    FIX: no funciona
-
-    void sortEdges(){
-        if(edges.empty()) return;
-        sort(edges.begin(), edges.end(), 
-            [](const Edge*& a, const Edge*& b) -> bool
-        { 
-            return a->weight > b->weight; 
-        });
-    }
-    */
-};
+#ifndef PFC_PROJECT_GRAPH_H
+#include "Vertex.h"
 
 class Graph {
 private:
@@ -114,3 +67,5 @@ public:
         E.clear();
     }
 };
+
+#endif // PFC_PROJECT_GRAPH_H
