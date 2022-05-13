@@ -76,7 +76,7 @@ private:
     }
 
     //vertex is already labelled
-    void DantzigExpand(int limit){
+    unordered_map <vertexIndex, unsigned> DantzigExpand(int limit){
         pwvv t;
         weightType weightT;
         vertexIndex vertexC, vertexT;
@@ -85,10 +85,7 @@ private:
             if (edgeT.empty()) break;
             t = edgeT.top();
             edgeT.pop();
-            int i = 0;
             while(!isUseful(t.second.second)){
-                i++;
-                if (i == 10) return;
                 if(edgeT.empty()) break;
                 t = edgeT.top();
                 edgeT.pop();
@@ -106,6 +103,7 @@ private:
                     insertNextUsefulEdge(uVertex);
             }
         }
+        return D;
     }
 
 
@@ -115,12 +113,12 @@ public:
         this->graph = graph;
     }
 
-    void SingleSource(vertexIndex s) {
+    unordered_map <vertexIndex, unsigned> SingleSource(vertexIndex s) {
         // graph->sortAdjacencyList();
         S.insert(s);
-        if(insertNextUsefulEdge(s) == false) return;
+        if(insertNextUsefulEdge(s) == false) return D;
         D[s] = 0;
-        DantzigExpand(graph->getNumberOfVertices());
+        return DantzigExpand(graph->getNumberOfVertices());
     }
 
     void print() {
@@ -128,20 +126,4 @@ public:
             cout << e.first << ": " << e.second << endl;
     }
 
-    /*
-
-    Vertex* cVertex;
-        vertexIndex t; 
-        for (vertexIndex c: S) {
-            cVertex = graph->findVertex(c);
-            if (cVertex == nullptr) continue;
-            for (auto edge: cVertex->edges) {
-                t = edge->end;
-                if (isUseful(t)) {
-                    T.insert(t);
-                }
-            }
-        }
-    
-    */
 };

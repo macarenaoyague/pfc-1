@@ -1,5 +1,6 @@
 #include "Testing.h"
 
 int main() {
-    Testing();
+    for (int i = 0; i < V; i++) 
+        Testing(i);
 }

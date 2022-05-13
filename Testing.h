@@ -3,6 +3,8 @@
 const int V = 9;
 const int MAX = 100000;
 
+
+// copiado de geeks for geeks
 int minDistance(bool sptSet[], vector<int>& dist) {
     int min = MAX, min_index;
     for (int v = 0; v < V; v++)
@@ -29,7 +31,7 @@ void dijkstra(int graph[V][V], int src, vector<int>& dist) {
 
 
 
-void Testing() {
+void Testing(int idx) {
 
     vector<int> dist(9);
     int graph1[V][V] = { { 0, 4, 0, 0, 0, 0, 0, 8, 0 },
@@ -42,11 +44,13 @@ void Testing() {
                         { 8, 11, 0, 0, 0, 0, 1, 0, 7 },
                         { 0, 0, 2, 0, 0, 0, 6, 7, 0 } };
 
-    dijkstra(graph1, 0, dist);
+    dijkstra(graph1, idx, dist);
     
+    /*
     cout << "dijkstra: " << endl;
     for (int i = 0; i<dist.size(); i++)
         cout << i << ": " << dist[i] << endl;
+    */
 
     Graph graph;
     for (int i = 0; i<V; i++)
@@ -65,8 +69,19 @@ void Testing() {
         }
         cout << endl;
     }
+
     Dantzig dantzig(&graph);
-    dantzig.SingleSource(0);
-    cout << "dantzig: " << endl;
-    dantzig.print();
+    unordered_map <vertexIndex, unsigned> dantzigAns = dantzig.SingleSource(idx);
+    // cout << "dantzig: " << endl;
+    // dantzig.print();
+    
+    cout << "Probando i=" << idx << endl;
+    bool funciona = true;
+    for (int i = 0; i < V; i++) {
+        if (dist[i] != dantzigAns[i]) {
+            cout << dist[i] << "!=" << dantzigAns[i] << endl;
+            funciona = false;
+        }
+    }
+    if (funciona) cout << "SUCCESS";
 }
