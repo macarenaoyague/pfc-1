@@ -13,6 +13,10 @@ int main(){
                         { 0, 0, 2, 0, 0, 0, 6, 7, 0 } };
     
     Graph myGraph(vertices, matrix, 0);
+    myGraph.print();
+    cout << "*******************+++" << endl;
     myGraph.sortAdjacencyList();
+    myGraph.print();
+    cout << "*******************+++" << endl;
     cout << "SUCCESS" << endl;
 }

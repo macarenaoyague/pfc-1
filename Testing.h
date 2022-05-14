@@ -1,8 +1,7 @@
-#include "Dantzig.h"
+#include "DantzigV2.h"
 
 const int V = 9;
 const int MAX = 100000;
-
 
 // copiado de geeks for geeks
 int minDistance(bool sptSet[], vector<int>& dist) {
@@ -29,8 +28,6 @@ void dijkstra(vector<vector<int>> graph, int src, vector<int>& dist) {
     }
 }
 
-
-
 void Testing(int idx) {
     cout << "Probando i=" << idx << endl;
 
@@ -47,18 +44,14 @@ void Testing(int idx) {
                         { 0, 0, 2, 0, 0, 0, 6, 7, 0 } };
 
     dijkstra(graph1, idx, dist);
-
     Graph graph(vertices, graph1, 0);
     Dantzig dantzig(&graph);
-
     auto dantzigAns = dantzig.SingleSource(idx);
-    // cout << "dantzig: " << endl;
-    // dantzig.print();
     
     bool funciona = true;
     for (int i = 0; i < V; i++) {
         if (dist[i] != dantzigAns[i]) {
-            cout << i << ": " << dist[i] << "!=" << dantzigAns[i] << endl;
+            cout << i << ": " << dist[i] << "!=" << dantzigAns[i+1] << endl;
             funciona = false;
         }
     }

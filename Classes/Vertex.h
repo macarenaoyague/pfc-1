@@ -4,13 +4,33 @@
 
 class Vertex {
 public:
-    vector<Edge*> edges;
     vertexIndex idx;
-    
-    Vertex(){}
-    explicit Vertex(vertexIndex _idx): idx(_idx){}
+    vector<Edge*> edges;
+    unordered_map<vertexIndex, Edge*> mappedEdges;
+
+    Vertex() {}
+    explicit Vertex(vertexIndex _idx): idx(_idx) {}
     void addEdge(Edge* edge){
         edges.push_back(edge);
+    }
+
+    Edge* findEdge(vertexIndex end){
+        Edge* result = nullptr;
+        if(!mappedEdges.empty()){
+            auto it = mappedEdges.find(end);
+            if(it != mappedEdges.end()) return it->second;
+        }
+        else{
+            for(auto& edge : edges)
+                if(edge->end == end) return edge;
+        }
+        return result;
+    }
+
+    void initializeMap(){
+        for(auto& edge : edges){
+            mappedEdges[edge->end] = edge;
+        }
     }
 
     void sortEdges(){

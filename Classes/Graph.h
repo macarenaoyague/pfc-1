@@ -57,11 +57,23 @@ public:
         return V[idx];
     }
 
+    Edge* findEdge(vertexIndex idx1, vertexIndex idx2){
+        auto it = V.find(idx1);
+        if(it != V.end()) return it->second->findEdge(idx2);
+        return nullptr;
+    }
+
     void sortAdjacencyList(){
         for(auto item: V) {
             item.second->sortEdges();
         }
-    } 
+    }
+
+    void initializeMaps(){
+        for(auto& v : V){
+            v.second->initializeMap();
+        }
+    }
 
     void print() {
         for (auto v: V) {
@@ -70,6 +82,12 @@ public:
                 cout << e->end << ":" << e->weight << " ";
             cout << endl;
         }
+    }
+
+    vector<vertexIndex> getVertexIndices(){
+        vector<vertexIndex> result;
+        for(auto item : V) result.emplace_back(item.first);
+        return result;
     }
     
     ~Graph(){
