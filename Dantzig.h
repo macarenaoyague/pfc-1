@@ -6,9 +6,7 @@
 typedef pair<weightType, pair<vertexIndex, vertexIndex>> pwvv;
 
 class Dantzig {
-
 private:
-
     Graph* graph;
 
     // nodos ya visitados (incluídos en D)
@@ -72,7 +70,7 @@ private:
     }
 
     //vertex is already labelled
-    unordered_map <vertexIndex, unsigned> DantzigExpand(int limit){
+    unordered_map <vertexIndex, weightType> DantzigExpand(int limit){
         pwvv t;
         weightType weightT;
         vertexIndex vertexC, vertexT;
@@ -106,12 +104,13 @@ private:
 
 
 public:
-
-    Dantzig(Graph* graph) {
+    Dantzig() = default;
+    explicit Dantzig(Graph* graph) {
+        graph->sortAdjacencyList();
         this->graph = graph;
     }
 
-    unordered_map <vertexIndex, unsigned> SingleSource(vertexIndex s) {
+    unordered_map <vertexIndex, weightType> SingleSource(vertexIndex s) {
         // graph->sortAdjacencyList();
         S.insert(s);
         if(insertNextUsefulEdge(s) == false) return D;

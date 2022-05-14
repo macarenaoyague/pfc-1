@@ -1,13 +1,35 @@
 #ifndef PFC_PROJECT_GRAPH_H
 #include "Vertex.h"
-
+#include <cassert>
 class Graph {
 private:
     vector<Edge*> E; // optional
     unordered_map <vertexIndex, Vertex*> V;
 public:
 
-    Graph(){}
+    Graph()= default;
+    Graph(vector<vertexIndex> vertices, vector<vector<weightType>> matrixAdjacency, weightType nullValue){
+        if(!vertices.empty() && vertices.size() == matrixAdjacency.size()){
+            size_t rows = matrixAdjacency.size();
+            size_t columns = matrixAdjacency[0].size();
+            assert(rows == columns);
+
+            for(auto vertex : vertices){
+                insertVertex(vertex);
+            }
+            
+            vertexIndex u, v;
+            weightType w;
+            for(int i = 0; i < rows; i++){
+                u = vertices[i];
+                for(int j = 0; j < columns; j++){
+                    v = vertices[j];
+                    w = matrixAdjacency[i][j];
+                    if(w != nullValue) insertEdge(u, v, w);
+                }
+            }
+        }
+    }
 
     bool insertVertex(vertexIndex idx) {
         if(V.find(idx) == V.end()){
@@ -18,7 +40,7 @@ public:
         return false;
     }
 
-    int getNumberOfVertices(){
+    size_t getNumberOfVertices(){
         return V.size();
     }
 
@@ -30,23 +52,15 @@ public:
         }
     }
     
-    size_t getVerticesNumber(){
-        return V.size();
-    }
-    
     Vertex* findVertex(vertexIndex idx){
         if(V.find(idx) == V.end()) return nullptr;
         return V[idx];
     }
 
     void sortAdjacencyList(){
-        //FIX: no funca
-        return;
-        /*
-        for(auto item: V){
+        for(auto item: V) {
             item.second->sortEdges();
         }
-        */
     } 
 
     void print() {
@@ -59,9 +73,8 @@ public:
     }
     
     ~Graph(){
-        for (auto v: V) {
-            v.second->edges.clear();
-            delete v.second;
+        for (auto vertex: V) {
+            delete vertex.second;
         }
         V.clear();
         E.clear();

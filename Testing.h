@@ -13,8 +13,8 @@ int minDistance(bool sptSet[], vector<int>& dist) {
  
     return min_index;
 }
- 
-void dijkstra(int graph[V][V], int src, vector<int>& dist) {
+
+void dijkstra(vector<vector<int>> graph, int src, vector<int>& dist) {
     bool sptSet[V];
     for (int i = 0; i < V; i++)
         dist[i] = MAX, sptSet[i] = false;
@@ -32,11 +32,11 @@ void dijkstra(int graph[V][V], int src, vector<int>& dist) {
 
 
 void Testing(int idx) {
-
     cout << "Probando i=" << idx << endl;
 
     vector<int> dist(9);
-    int graph1[V][V] = { { 0, 4, 0, 0, 0, 0, 0, 8, 0 },
+    vector<int> vertices = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+    vector<vector<int>> graph1 = { { 0, 4, 0, 0, 0, 0, 0, 8, 0 },
                         { 4, 0, 8, 0, 0, 0, 0, 11, 0 },
                         { 0, 8, 0, 7, 0, 4, 0, 0, 2 },
                         { 0, 0, 7, 0, 9, 14, 0, 0, 0 },
@@ -47,32 +47,11 @@ void Testing(int idx) {
                         { 0, 0, 2, 0, 0, 0, 6, 7, 0 } };
 
     dijkstra(graph1, idx, dist);
-    
-    /*
-    cout << "dijkstra: " << endl;
-    for (int i = 0; i<dist.size(); i++)
-        cout << i << ": " << dist[i] << endl;
-    */
 
-    Graph graph;
-    for (int i = 0; i<V; i++)
-        graph.insertVertex(i);
-
-    for (int i = 0; i < V; i++) {
-        vector<pair<int, int>> p;
-        for (int j = 0; j< V; j++) {
-            if (graph1[i][j] != 0) {
-                p.push_back({graph1[i][j], j});
-            }
-        }
-        sort(p.begin(), p.end());
-        for (auto e: p) {
-            graph.insertEdge(i, e.second, e.first);
-        }
-    }
-
+    Graph graph(vertices, graph1, 0);
     Dantzig dantzig(&graph);
-    unordered_map <vertexIndex, unsigned> dantzigAns = dantzig.SingleSource(idx);
+
+    auto dantzigAns = dantzig.SingleSource(idx);
     // cout << "dantzig: " << endl;
     // dantzig.print();
     
@@ -83,6 +62,7 @@ void Testing(int idx) {
             funciona = false;
         }
     }
-    if (funciona) cout << "SUCCESS";
+    if (funciona) cout << "******** SUCCESS";
+    else cout << "******** NO SUCCESS";
     cout << endl;
 }

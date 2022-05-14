@@ -7,7 +7,7 @@
 #include <algorithm>
 using namespace std;
 
-typedef unsigned vertexIndex;
-typedef unsigned weightType;
+typedef int vertexIndex;
+typedef int weightType;
 
 #endif // PFC_PROJECT_GLOBAL_H
