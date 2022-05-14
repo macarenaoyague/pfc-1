@@ -1,12 +1,13 @@
-#ifndef PFC_PROJECT_DANTZIGV2_H
-#define PFC_PROJECT_DANTZIGV2_H
+#ifndef PFC_PROJECT_ALGORITHM_H
+#define PFC_PROJECT_ALGORITHM_H
 #include "Classes/Graph.h"
 #include <unordered_set>
 #include <queue>
 
 
-class Dantzig {
+class Algorithm {
 private:
+    enum algorithmType {Dantzig, Spira};
     Graph* graph;
     unordered_set<vertexIndex> S;
     unordered_map<vertexIndex, weightType> D;
@@ -17,23 +18,29 @@ private:
         return S.find(t) == S.end();
     }
 
-    Edge* getEdgeCandidate(vertexIndex s){
+    Edge* getEdgeCandidate(vertexIndex s, algorithmType algorithm){
         Edge* edgeUseful = nullptr;
-        size_t i;
         auto vertex = graph->findVertex(s);
         auto edges = vertex->edges;
-        for(i = currentUsefulEdge[s]; i < edges.size(); ++i) {
-            if (isUseful(edges[i]->end)) {
-                edgeUseful = edges[i];
-                break;
+        size_t i = currentUsefulEdge[s];
+        if(algorithm == Spira){
+            if(i != edges.size()){
+                edgeUseful = edges[i++];
+            }
+        }else{
+            for(;i < edges.size(); ++i) {
+                if (isUseful(edges[i]->end)) {
+                    edgeUseful = edges[i];
+                    break;
+                }
             }
         }
         currentUsefulEdge[s] = i;
         return edgeUseful;
     }
 
-    void addEdgeCandidate(vertexIndex s){
-        auto edgeCandidate = getEdgeCandidate(s);
+    void addEdgeCandidate(vertexIndex s, algorithmType algorithm){
+        auto edgeCandidate = getEdgeCandidate(s, algorithm);
         if(edgeCandidate != nullptr) {
             auto weight = edgeCandidate->weight;
             candidateEdges.emplace(D[s] + weight, edgeCandidate);
@@ -54,7 +61,7 @@ private:
             if(!isUseful(t)){
                 v = it->second->start;
                 toRemove.push_back(it);
-                addEdgeCandidate(v);
+                addEdgeCandidate(v, Dantzig);
             }
         }
         for(auto it : toRemove){
@@ -62,9 +69,16 @@ private:
         }
     }
 
+    void replaceUselessCandidate(){
+        auto it = candidateEdges.begin();
+        vertexIndex c = it->second->start;
+        candidateEdges.erase(it);
+        addEdgeCandidate(c, Spira);
+    }
+
 public:
-    Dantzig() = default;
-    explicit Dantzig(Graph* graph) {
+    Algorithm() = default;
+    explicit Algorithm(Graph* graph) {
         graph->sortAdjacencyList();
         for(auto index : graph->getVertexIndices()) {
             D[index] = 0;
@@ -73,12 +87,21 @@ public:
         this->graph = graph;
     }
 
-    unordered_map<vertexIndex, weightType> SingleSource(vertexIndex s) {
+    unordered_map<vertexIndex, weightType> DantzigAlgorithm(vertexIndex s){
+        return SingleSource(s, Dantzig);
+    }
+
+    unordered_map<vertexIndex, weightType> SpiraAlgorithm(vertexIndex s){
+        return SingleSource(s, Spira);
+    }
+
+    unordered_map<vertexIndex, weightType> SingleSource(vertexIndex s, algorithmType algorithm) {
         assert(graph->findVertex(s) != nullptr);
         S.emplace(s);
         D[s] = 0;
-        addEdgeCandidate(s);
-        return DantzigExpand((int) graph->getNumberOfVertices());
+        addEdgeCandidate(s, algorithm);
+        if(algorithm == Dantzig) return DantzigExpand((int) graph->getNumberOfVertices());
+        return SpiraExpand((int) graph->getNumberOfVertices());
     }
 
     unordered_map<vertexIndex, weightType> DantzigExpand(int limit){
@@ -89,8 +112,24 @@ public:
             S.emplace(t);
             D[t] = D[c] + weight;
             if(S.size() == limit) break;
-            addEdgeCandidate(t);
+            addEdgeCandidate(t, Dantzig);
             replaceUselessCandidates();
+        }
+        return D;
+    }
+
+    unordered_map<vertexIndex, weightType> SpiraExpand(int limit){
+        vertexIndex c, t, v;
+        weightType weight; // C(c, t)
+        while(S.size() < limit) {
+            initializeValues(c, t, weight, candidateEdges.begin());
+            if(S.find(t) == S.end()){
+                S.emplace(t);
+                D[t] = D[c] + weight;
+                if(S.size() == limit) break;
+                addEdgeCandidate(t, Spira);
+            }
+            replaceUselessCandidate();
         }
         return D;
     }
@@ -102,4 +141,4 @@ public:
 
 };
 
-#endif //PFC_PROJECT_DANTZIGV2_H
+#endif //PFC_PROJECT_ALGORITHM_H

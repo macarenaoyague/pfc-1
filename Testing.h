@@ -1,8 +1,13 @@
-#include "DantzigV2.h"
+#include "Algorithm.h"
 
 const int V = 9;
 const int MAX = 100000;
 
+void printVector(vector<int>& dist){
+    for(auto item : dist)
+        cout << item << " ";
+    cout << endl;
+}
 // copiado de geeks for geeks
 int minDistance(bool sptSet[], vector<int>& dist) {
     int min = MAX, min_index;
@@ -45,12 +50,13 @@ void Testing(int idx) {
 
     dijkstra(graph1, idx, dist);
     Graph graph(vertices, graph1, 0);
-    Dantzig dantzig(&graph);
-    auto dantzigAns = dantzig.SingleSource(vertices[idx]);
-    
+    Algorithm algorithm(&graph);
+    auto dantzigAns = algorithm.DantzigAlgorithm(vertices[idx]);
+    auto spiraAns = algorithm.SpiraAlgorithm(vertices[idx]);
     bool funciona = true;
+
     for (int i = 0; i < V; i++) {
-        if (dist[i] != dantzigAns[vertices[i]]) {
+        if (dist[i] != dantzigAns[vertices[i]] || dist[i] != spiraAns[vertices[i]]) {
             cout << i << ": " << dist[i] << "!=" << dantzigAns[i+1] << endl;
             funciona = false;
         }
