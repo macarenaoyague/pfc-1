@@ -32,7 +32,7 @@ void Testing(int idx) {
     cout << "Probando i=" << idx << endl;
 
     vector<int> dist(9);
-    vector<int> vertices = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+    vector<int> vertices = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     vector<vector<int>> graph1 = { { 0, 4, 0, 0, 0, 0, 0, 8, 0 },
                         { 4, 0, 8, 0, 0, 0, 0, 11, 0 },
                         { 0, 8, 0, 7, 0, 4, 0, 0, 2 },
@@ -46,11 +46,11 @@ void Testing(int idx) {
     dijkstra(graph1, idx, dist);
     Graph graph(vertices, graph1, 0);
     Dantzig dantzig(&graph);
-    auto dantzigAns = dantzig.SingleSource(idx);
+    auto dantzigAns = dantzig.SingleSource(vertices[idx]);
     
     bool funciona = true;
     for (int i = 0; i < V; i++) {
-        if (dist[i] != dantzigAns[i]) {
+        if (dist[i] != dantzigAns[vertices[i]]) {
             cout << i << ": " << dist[i] << "!=" << dantzigAns[i+1] << endl;
             funciona = false;
         }
