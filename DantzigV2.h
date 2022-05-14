@@ -46,23 +46,12 @@ private:
         weight = item->second->weight;
     }
 
-    unordered_set<Edge*> getUselessCandidates(vertexIndex t){
-        unordered_set<Edge*> result;
-        vertexIndex v;
-        for(auto& item : D){
-            v = item.first;
-            auto edgeUseless = graph->findEdge(v, t);
-            if(edgeUseless != nullptr) result.insert(edgeUseless);
-        }
-        return result;
-    }
-
-    void replace(unordered_set<Edge*> uselessCandidate){
+    void replaceUselessCandidates(){
         vector<map<weightType, Edge*>::iterator> toRemove;
-        vertexIndex v;
+        vertexIndex v, t;
         for(auto it = candidateEdges.begin(); it != candidateEdges.end(); ++it){
-            auto aux = uselessCandidate.find(it->second);
-            if(aux != uselessCandidate.end()){
+            t = it->second->end;
+            if(!isUseful(t)){
                 v = it->second->start;
                 toRemove.push_back(it);
                 addEdgeCandidate(v);
@@ -77,7 +66,6 @@ public:
     Dantzig() = default;
     explicit Dantzig(Graph* graph) {
         graph->sortAdjacencyList();
-        graph->initializeMaps();
         for(auto index : graph->getVertexIndices()) {
             D[index] = 0;
             currentUsefulEdge[index] = 0;
@@ -102,8 +90,7 @@ public:
             D[t] = D[c] + weight;
             if(S.size() == limit) break;
             addEdgeCandidate(t);
-            auto uselessCandidates = getUselessCandidates(t);
-            replace(uselessCandidates);
+            replaceUselessCandidates();
         }
         return D;
     }

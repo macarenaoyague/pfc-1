@@ -69,12 +69,6 @@ public:
         }
     }
 
-    void initializeMaps(){
-        for(auto& v : V){
-            v.second->initializeMap();
-        }
-    }
-
     void print() {
         for (auto v: V) {
             cout << v.second->idx << ": ";
