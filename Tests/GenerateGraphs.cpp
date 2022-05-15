@@ -1,7 +1,7 @@
 #include "Util.h"
 #include "fstream"
 
-vector<vector<bool>> generateMatrixAdjacencyBoolean(int n, bool completed = false, bool directed = false){
+vector<vector<bool>> generateMatrixAdjacencyBoolean(int n, bool completed = true, bool directed = true){
     vector<vector<bool>> matrixAdjacencyBoolean(n, vector<bool>(n, 0));
     for(int i = 0; i < n; i++){
         for(int j = 0; j < n; ++j){
@@ -15,7 +15,7 @@ vector<vector<bool>> generateMatrixAdjacencyBoolean(int n, bool completed = fals
     return matrixAdjacencyBoolean;
 }
 
-vector<vector<int>> generateMatrixAdjacency(int n, bool completed = false, bool directed = false){
+vector<vector<int>> generateMatrixAdjacency(int n, bool completed = true, bool directed = true){
     vector<vector<bool>> matrixAdjacencyBoolean = generateMatrixAdjacencyBoolean(n, completed, directed);
     vector<vector<int>> matrixAdjacency(n, vector<int>(n, 0));
     bool boolean;
@@ -34,12 +34,12 @@ vector<vector<int>> generateMatrixAdjacency(int n, bool completed = false, bool 
     return matrixAdjacency;
 }
 
-void generateGraphs(int limit, string folder = ""){
-    for(int i = 2; i < limit; ++i){
-        string fileName = folder + "graph" + to_string(i) + ".txt";
+void generateGraphs( string folder = "", int start = 10, int rate = 10, int iterations = 4){
+    for(int i = 0, n = start; i < iterations; i++, n*=rate){
+        string fileName = folder + "graph" + to_string(n) + ".txt";
         ofstream file(fileName);
-        auto matrix = generateMatrixAdjacency(i);
-        file << i << "\n";
+        auto matrix = generateMatrixAdjacency(n);
+        file << n << "\n";
         printMatrix(matrix, file);
         file.close();
     }
@@ -47,8 +47,8 @@ void generateGraphs(int limit, string folder = ""){
 
 int main(){
     srand(time(NULL));
-    ofstream file("graph.txt");
-    auto matrix = generateMatrixAdjacency(16);
-    printMatrix(matrix, file);
-    // generateGraphs(100, "../Graphs/");
+    // ofstream file("graph.txt");
+    // auto matrix = generateMatrixAdjacency(16);
+    // printMatrix(matrix, file);
+    generateGraphs("../Graphs/", 10, 5);
 }
