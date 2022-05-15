@@ -8,7 +8,6 @@
 
 
 .idea/*
-CMakeLists.txt
 
 # User-specific stuff
 .idea/**/workspace.xml
