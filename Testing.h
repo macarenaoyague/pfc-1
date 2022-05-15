@@ -52,6 +52,7 @@ void Testing(int idx) {
     Graph graph(vertices, graph1, 0);
     Algorithm algorithm(&graph);
     auto dantzigAns = algorithm.DantzigAlgorithm(vertices[idx]);
+    algorithm.restart();
     auto spiraAns = algorithm.SpiraAlgorithm(vertices[idx]);
     bool funciona = true;
 

@@ -76,15 +76,19 @@ private:
         addEdgeCandidate(c, Spira);
     }
 
-public:
-    Algorithm() = default;
-    explicit Algorithm(Graph* graph) {
-        graph->sortAdjacencyList();
+    void initialize(){
         for(auto index : graph->getVertexIndices()) {
             D[index] = 0;
             currentUsefulEdge[index] = 0;
         }
+    }
+
+public:
+    Algorithm() = default;
+    explicit Algorithm(Graph* graph) {
         this->graph = graph;
+        graph->sortAdjacencyList();
+        initialize();
     }
 
     unordered_map<vertexIndex, weightType> DantzigAlgorithm(vertexIndex s){
@@ -132,6 +136,12 @@ public:
             replaceUselessCandidate();
         }
         return D;
+    }
+
+    void restart(){
+        S.clear();
+        candidateEdges.clear();
+        initialize();
     }
 
     void print() {
