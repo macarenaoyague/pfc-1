@@ -1,13 +1,8 @@
 #include "Algorithm.h"
 #include <stdlib.h>  
+#include <fstream>
 
 const int MAX = 10000000;
-
-void printVector(vector<int>& dist){
-    for(auto item : dist)
-        cout << item << " ";
-    cout << endl;
-}
 
 // copiado de geeks for geeks
 int minDistance(vector<bool> sptSet, vector<int>& dist, int& size) {
@@ -36,37 +31,24 @@ vector<int> dijkstra(vector<vector<int>> graph, int src, int size) {
     return dist;
 }
 
-void readFromFile(string fileName, vector<vector<bool>>& matrixAdjacencyBoolean){
-    // TODO colocar este y más grafos en archivos para ser leídos
-    matrixAdjacencyBoolean = { { 0, 1, 0, 0, 0, 0, 0, 1, 0 },
-                        { 1, 0, 1, 0, 0, 0, 0, 1, 0 },
-                        { 0, 1, 0, 1, 0, 1, 0, 0, 1 },
-                        { 0, 0, 1, 0, 1, 1, 0, 0, 0 },
-                        { 0, 0, 0, 1, 0, 1, 0, 0, 0 },
-                        { 0, 0, 1, 1, 1, 0, 1, 0, 0 },
-                        { 0, 0, 0, 0, 0, 1, 0, 1, 1 },
-                        { 1, 1, 0, 0, 0, 0, 1, 0, 1 },
-                        { 0, 0, 1, 0, 0, 0, 1, 1, 0 } };
-}
-
-void generateMatrixAdjacency(string fileName, vector<vector<int>>& matrixAdjacency){
-    vector<vector<bool>> matrixAdjacencyBoolean;
-    readFromFile(fileName, matrixAdjacencyBoolean);
-    vector<int> listAdjacency;
-
-    srand(time(NULL));
-    float seedFunction;
-    for (int i = 0; i < 9; i++){
-        seedFunction = float(rand()%100+1)/100;
-        for (auto boolean: matrixAdjacencyBoolean[i]){
-            if (boolean){
-                listAdjacency.push_back((rand()%1000)*seedFunction);
-            } else {
-                listAdjacency.push_back(0);
+void readFromFile(string fileName, vector<vector<int>>& matrixAdjacency){
+    ifstream file(fileName);
+    if(file.is_open()){
+        int n, weight;
+        vector<int> v;
+        file >> n;
+        for(int i = 0; i < n; i++){
+            for(int j = 0; j < n; j++){
+                file >> weight;
+                v.emplace_back(weight);
             }
+            matrixAdjacency.emplace_back(v);
+            v.clear();
         }
-        matrixAdjacency.push_back(listAdjacency);
-        listAdjacency.clear();
+    }
+    else {
+        cout << "ERROR AL ABRIR ARCHIVO" << endl;
+        assert(false);
     }
 }
 
@@ -80,8 +62,9 @@ void Testing(int idx, string fileName) {
     cout << "Probando i=" << idx << endl;
                  
     vector<vector<int>> matrixAdjacency;
-    generateMatrixAdjacency(fileName, matrixAdjacency);
-    vector<int> vertices; 
+    vector<int> vertices;
+
+    readFromFile(fileName, matrixAdjacency);
     generateVerticesIndexes(matrixAdjacency.size(), vertices);
 
     vector<int> dist = dijkstra(matrixAdjacency, idx, vertices.size());
