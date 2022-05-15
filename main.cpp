@@ -1,6 +1,5 @@
-#include "Testing.h"
+#include "Testing.hpp"
 
 int main() {
-    for (int i = 0; i < 9; i++)
-        Testing(i, "Graphs/graph.txt");
+  for (int i = 0; i < 9; i++) Testing(i, "Graphs/graph.txt");
 }
