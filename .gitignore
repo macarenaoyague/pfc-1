@@ -8,7 +8,6 @@
 
 
 .idea/*
-CMakeLists.txt
 
 # User-specific stuff
 .idea/**/workspace.xml
@@ -143,3 +142,7 @@ fabric.properties
 *.out
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,clion
+
+out
+
+build/

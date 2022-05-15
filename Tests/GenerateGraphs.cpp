@@ -1,4 +1,4 @@
-#include "Util.h"
+#include "Util.hpp"
 #include "fstream"
 
 vector<vector<bool>> generateMatrixAdjacencyBoolean(int n, bool completed = true, bool directed = true){
@@ -12,7 +12,7 @@ vector<vector<bool>> generateMatrixAdjacencyBoolean(int n, bool completed = true
             }
         }
     }
-    return matrixAdjacencyBoolean;
+  return matrixAdjacencyBoolean;
 }
 
 vector<vector<int>> generateMatrixAdjacency(int n, bool completed = true, bool directed = true){
@@ -31,7 +31,7 @@ vector<vector<int>> generateMatrixAdjacency(int n, bool completed = true, bool d
             else matrixAdjacency[i][j] = 0;
         }
     }
-    return matrixAdjacency;
+  return matrixAdjacency;
 }
 
 void generateGraphs( string folder = "", int start = 10, int rate = 10, int iterations = 4){
