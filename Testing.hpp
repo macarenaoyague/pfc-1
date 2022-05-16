@@ -1,9 +1,9 @@
-#include <stdlib.h>
 
+#include <cstdlib>
 #include <fstream>
-
 #include "Algorithm.hpp"
-
+#include "Algorithms/Dantzig.hpp"
+#include "Tests/Util.hpp"
 const int MAX = 10000000;
 
 // copiado de geeks for geeks
@@ -70,8 +70,8 @@ void Testing(int idx, string fileName) {
 
   Graph graph(vertices, matrixAdjacency, 0);
   Algorithm algorithm(&graph);
-
-  auto dantzigAns = algorithm.DantzigAlgorithm(vertices[idx]);
+  ImprovedDantzig dantzig(&graph);
+  auto dantzigAns = dantzig.DantzigAlgorithm(vertices[idx]);
   algorithm.restart();
   auto spiraAns = algorithm.SpiraAlgorithm(vertices[idx]);
   bool funciona = true;

@@ -1,4 +1,4 @@
-#pragma once
+#ifndef PFC_PROJECT_ALGORITHM_H
 
 #include <queue>
 #include <unordered_set>
@@ -149,3 +149,5 @@ class Algorithm {
     for (auto e : D) cout << e.first << ": " << e.second << endl;
   }
 };
+
+#endif  // PFC_PROJECT_ALGORITHM_H
