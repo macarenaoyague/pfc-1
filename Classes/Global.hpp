@@ -1,4 +1,5 @@
 #ifndef PFC_PROJECT_GLOBAL_H
+#define PFC_PROJECT_GLOBAL_H
 
 #include <algorithm>
 #include <iostream>

@@ -1,9 +1,9 @@
 
 #include <cstdlib>
 #include <fstream>
-#include "Algorithm.hpp"
-#include "Algorithms/Dantzig.hpp"
-#include "Tests/Util.hpp"
+#include "../Algorithms/Dantzig.hpp"
+#include "../Algorithms/Spira.hpp"
+#include "Util.hpp"
 const int MAX = 10000000;
 
 // copiado de geeks for geeks
@@ -69,17 +69,22 @@ void Testing(int idx, string fileName) {
   vector<int> dist = dijkstra(matrixAdjacency, idx, vertices.size());
 
   Graph graph(vertices, matrixAdjacency, 0);
-  Algorithm algorithm(&graph);
-  ImprovedDantzig dantzig(&graph);
-  auto dantzigAns = dantzig.DantzigAlgorithm(vertices[idx]);
-  algorithm.restart();
-  auto spiraAns = algorithm.SpiraAlgorithm(vertices[idx]);
-  bool funciona = true;
 
+  OriginalDantzig dantzig1(&graph);
+  ImprovedDantzig dantzig2(&graph);
+
+  OriginalSpira spira(&graph);
+
+  auto dantzigAnsOriginal = dantzig1.DantzigAlgorithm(vertices[idx]);
+  auto dantzigAnsImproved = dantzig2.DantzigAlgorithm(vertices[idx]);
+  auto spiraAns = spira.SpiraAlgorithm(vertices[idx]);
+
+  bool funciona = true;
   for (int i = 0; i < vertices.size(); i++) {
-    if (dist[i] != dantzigAns[vertices[i]] ||
+    if (dist[i] != dantzigAnsOriginal[vertices[i]] ||
+        dist[i] != dantzigAnsImproved[vertices[i]] ||
         dist[i] != spiraAns[vertices[i]]) {
-      cout << i << ": " << dist[i] << "!=" << dantzigAns[i + 1] << endl;
+      cout << i << ": " << dist[i] << "!=" << endl;
       funciona = false;
     }
   }

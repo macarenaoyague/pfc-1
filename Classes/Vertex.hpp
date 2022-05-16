@@ -1,5 +1,5 @@
 #ifndef PFC_PROJECT_VERTEX_H
-
+#define PFC_PROJECT_VERTEX_H
 #include "Edge.hpp"
 
 class Vertex {

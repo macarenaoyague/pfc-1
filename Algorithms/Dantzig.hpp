@@ -1,88 +1,79 @@
 #ifndef PFC_PROJECT_DANTZIG_H
+#define PFC_PROJECT_DANTZIG_H
 
-using arrayType = vector<pair<weightType, Edge*>>;
-using mapType = multimap<weightType, Edge*>;
+#include "Algorithm.hpp"
+#include <algorithm>
 
 template<typename candidateType>
-class Dantzig{
+class Dantzig : public Algorithm<candidateType>{
 protected:
-    Graph* graph;
-    unordered_set<vertexIndex> S;
-    unordered_map<vertexIndex, weightType> D;
-    unordered_map<vertexIndex, size_t> currentUsefulEdge;
-    candidateType candidateEdges;
-
-    void setDefaultValues() {
-        S.clear();
-        for (auto index : graph->getVertexIndices()) {
-            D[index] = 0;
-            currentUsefulEdge[index] = 0;
+    Edge* getEdgeCandidate(vertexIndex s) override {
+        Edge* edgeUseful = nullptr;
+        auto vertex = this->graph->findVertex(s);
+        auto edges = vertex->edges;
+        size_t i = this->currentUsefulEdge[s];
+        for (; i < edges.size(); ++i) {
+            if (this->isUseful(edges[i]->end)) {
+                edgeUseful = edges[i];
+                break;
+            }
         }
-    }
-    void restart(){
-        setDefaultValues();
-        candidateEdges.clear();
+        this->currentUsefulEdge[s] = i;
+        return edgeUseful;
     }
 
-    bool isUseful(vertexIndex t) { return S.find(t) == S.end(); }
-    virtual Edge* getEdgeCandidate(vertexIndex s) = 0;
-    virtual void addEdgeCandidate(vertexIndex s) = 0;
-    virtual void replaceUselessCandidates() = 0;
-    virtual void initializeValues(vertexIndex& c, vertexIndex& t, weightType& weight,
-                          const typename candidateType::iterator& item) = 0;
+    void replaceUselessCandidates() {
+        vector<vertexIndex> insertCandidatesUsefulFromV;
+        erase_if(this->candidateEdges, [this, &insertCandidatesUsefulFromV](auto& item) -> bool{
+            vertexIndex t = item.second->end;
+            if(!this->isUseful(t)){
+                vertexIndex v = item.second->start;
+                insertCandidatesUsefulFromV.emplace_back(v);
+                return true;
+            }
+            return false;
+        });
 
-    unordered_map<vertexIndex, weightType> SingleSource(vertexIndex s){
-        assert(graph->findVertex(s) != nullptr);
-        S.emplace(s);
-        D[s] = 0;
-        addEdgeCandidate(s);
-        return DantzigExpand((int)graph->getNumberOfVertices());
+        for(auto& v : insertCandidatesUsefulFromV)
+            this->addEdgeCandidate(v);
     }
 
-    unordered_map<vertexIndex, weightType> DantzigExpand(int limit) {
+    unordered_map<vertexIndex, weightType> algorithmExpand(int limit) override{
         vertexIndex c, t, v;
         weightType weight;  // C(c, t)
-        while (S.size() < limit) {
-            initializeValues(c, t, weight, candidateEdges.begin());
-            S.emplace(t);
-            D[t] = D[c] + weight;
-            if (S.size() == limit) break;
-            addEdgeCandidate(t);
+        while (this->S.size() < limit) {
+            this->initializeValues(c, t, weight, this->getCandidateOfLeastWeight());
+            this->S.emplace(t);
+            this->D[t] = this->D[c] + weight;
+            if (this->S.size() == limit) break;
+            this->addEdgeCandidate(t);
             replaceUselessCandidates();
         }
-        return D;
+        return this->D;
     }
 
 public:
-    Dantzig(): graph(nullptr){};
-    explicit Dantzig(Graph* _graph) : graph(_graph){
-        graph->sortAdjacencyList();
-        setDefaultValues();
-    }
+    Dantzig(): Algorithm<candidateType>() {}
+    explicit Dantzig(Graph* _graph) : Algorithm<candidateType>(_graph) {};
     unordered_map<vertexIndex, weightType> DantzigAlgorithm(vertexIndex s){
-        return SingleSource(s);
+        return this->SingleSource(s);
     }
 };
 
 
 class OriginalDantzig : public Dantzig<arrayType>{
 private:
-    Edge* getEdgeCandidate(vertexIndex s) override {
-
+    arrayType::iterator getCandidateOfLeastWeight() override{
+        return min_element(candidateEdges.begin(), candidateEdges.end(), [](const auto& lhs, const auto& rhs) {
+            return lhs.first < rhs.first;
+        });
     }
 
-    void addEdgeCandidate(vertexIndex s) override {
-
+    void insertCandidate(Edge* candidate) override{
+        auto weight = D[candidate->start] + candidate->weight;
+        candidateEdges.emplace_back(weight, candidate);
     }
 
-    void replaceUselessCandidates() override {
-
-    }
-
-    void initializeValues(vertexIndex& c, vertexIndex& t, weightType& weight,
-                                  const arrayType::iterator& item) override {
-
-    }
 public:
     OriginalDantzig()= default;
     explicit OriginalDantzig(Graph* graph): Dantzig<arrayType>(graph){}
@@ -91,48 +82,12 @@ public:
 
 class ImprovedDantzig : public Dantzig<mapType>{
 private:
-    void initializeValues(vertexIndex& c, vertexIndex& t, weightType& weight,
-                          const mapType::iterator& item) override {
-        c = item->second->start;
-        t = item->second->end;
-        weight = item->second->weight;
+    mapType::iterator getCandidateOfLeastWeight() override{
+        return candidateEdges.begin();
     }
-
-    Edge* getEdgeCandidate(vertexIndex s) override{
-        Edge* edgeUseful = nullptr;
-        auto vertex = graph->findVertex(s);
-        auto edges = vertex->edges;
-        size_t i = currentUsefulEdge[s];
-        for (; i < edges.size(); ++i) {
-            if (isUseful(edges[i]->end)) {
-                edgeUseful = edges[i];
-                break;
-            }
-        }
-        currentUsefulEdge[s] = i;
-        return edgeUseful;
-    }
-    void addEdgeCandidate(vertexIndex s) override{
-        auto edgeCandidate = getEdgeCandidate(s);
-        if (edgeCandidate != nullptr) {
-            auto weight = edgeCandidate->weight;
-            candidateEdges.emplace(D[s] + weight, edgeCandidate);
-        }
-    }
-    void replaceUselessCandidates() override{
-        vector<mapType::iterator> toRemove;
-        vertexIndex v, t;
-        for (auto it = candidateEdges.begin(); it != candidateEdges.end(); ++it) {
-            t = it->second->end;
-            if (!isUseful(t)) {
-                v = it->second->start;
-                toRemove.push_back(it);
-                addEdgeCandidate(v);
-            }
-        }
-        for (auto it : toRemove) {
-            candidateEdges.erase(it);
-        }
+    void insertCandidate(Edge* candidate) override{
+        auto weight = D[candidate->start] + candidate->weight;
+        candidateEdges.emplace(weight, candidate);
     }
 public:
     ImprovedDantzig()= default;

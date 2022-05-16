@@ -1,4 +1,5 @@
 #ifndef PFC_PROJECT_GRAPH_H
+#define PFC_PROJECT_GRAPH_H
 #include <cassert>
 
 #include "Vertex.hpp"
