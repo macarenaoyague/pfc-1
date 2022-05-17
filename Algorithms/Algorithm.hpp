@@ -3,12 +3,20 @@
 
 #include "../Classes/Graph.hpp"
 
-using arrayType = vector<pair<weightType, Edge*>>;
+#include <queue>
+
+using pairType = pair<weightType, Edge*>;
+using arrayType = vector<pairType>;
 using mapType = multimap<weightType, Edge*>;
+using pqType = priority_queue<pairType, arrayType, greater<>>;
+
+class MoffatAndTakaoka;
 
 template <typename candidateType>
 class Algorithm{
 protected:
+    friend class MoffatAndTakaoka;
+
     Graph* graph;
     unordered_set<vertexIndex> S;
     unordered_map<vertexIndex, weightType> D;
@@ -25,24 +33,19 @@ protected:
         }
     }
 
-    unordered_map<vertexIndex, weightType> SingleSource(vertexIndex s){
+    unordered_map<vertexIndex, weightType>  SingleSource(vertexIndex s, size_t n){
         assert(this->graph->findVertex(s) != nullptr);
         S.emplace(s);
         D[s] = 0;
         addEdgeCandidate(s);
-        return algorithmExpand((int)graph->getNumberOfVertices());
+        return algorithmExpand(n);
     }
 
     void initializeValues(vertexIndex& c, vertexIndex& t, weightType& weight,
-                          const typename candidateType::iterator& item) {
-        c = item->second->start;
-        t = item->second->end;
-        weight = item->second->weight;
-    }
-
-    void restart(){
-        this->setDefaultValues();
-        this->candidateEdges.clear();
+                          Edge* edge) {
+        c = edge->start;
+        t = edge->end;
+        weight = edge->weight;
     }
 
     void addEdgeCandidate(vertexIndex s) {
@@ -53,8 +56,8 @@ protected:
     }
 
     virtual void insertCandidate(Edge* candidate) = 0;
-    virtual typename candidateType::iterator getCandidateOfLeastWeight() = 0;
-    virtual unordered_map<vertexIndex, weightType> algorithmExpand(int limit) = 0;
+    virtual Edge* getCandidateOfLeastWeight() = 0;
+    virtual unordered_map<vertexIndex, weightType> algorithmExpand(size_t limit) = 0;
     virtual Edge* getEdgeCandidate(vertexIndex s) = 0;
 
 public:
@@ -62,6 +65,8 @@ public:
     explicit Algorithm(Graph* _graph) : graph(_graph){
         graph->sortAdjacencyList();
         setDefaultValues();
+    }
+    explicit Algorithm(Graph* _graph, pqType& Uedges) : graph(_graph), candidateEdges(Uedges){
     }
 };
 

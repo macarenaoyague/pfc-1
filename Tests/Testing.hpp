@@ -3,6 +3,8 @@
 #include <fstream>
 #include "../Algorithms/Dantzig.hpp"
 #include "../Algorithms/Spira.hpp"
+#include "../Algorithms/MoffatAndTakaoka.hpp"
+
 #include "Util.hpp"
 const int MAX = 10000000;
 
@@ -58,14 +60,12 @@ void generateVerticesIndexes(int size, vector<int>& vertices) {
 }
 
 void Testing(int idx, string fileName) {
-  cout << "Probando i=" << idx << endl;
-
   vector<vector<int>> matrixAdjacency;
   vector<int> vertices;
 
   readFromFile(fileName, matrixAdjacency);
   generateVerticesIndexes(matrixAdjacency.size(), vertices);
-
+  cout << "Probando i=" << vertices[idx] << endl;
   vector<int> dist = dijkstra(matrixAdjacency, idx, vertices.size());
 
   Graph graph(vertices, matrixAdjacency, 0);
@@ -75,16 +75,18 @@ void Testing(int idx, string fileName) {
 
   OriginalSpira spira(&graph);
 
+  MoffatAndTakaoka proposal(&graph);
   auto dantzigAnsOriginal = dantzig1.DantzigAlgorithm(vertices[idx]);
   auto dantzigAnsImproved = dantzig2.DantzigAlgorithm(vertices[idx]);
   auto spiraAns = spira.SpiraAlgorithm(vertices[idx]);
-
+  auto proposalAns = proposal.MoffatAndTakaokaAlgorithm(vertices[idx]);
   bool funciona = true;
   for (int i = 0; i < vertices.size(); i++) {
     if (dist[i] != dantzigAnsOriginal[vertices[i]] ||
         dist[i] != dantzigAnsImproved[vertices[i]] ||
-        dist[i] != spiraAns[vertices[i]]) {
-      cout << i << ": " << dist[i] << "!=" << endl;
+        dist[i] != spiraAns[vertices[i]] ||
+        dist[i] != proposalAns[vertices[i]]) {
+      cout << vertices[i] << ": " << dist[i] << "!=" << proposalAns[vertices[i]] << endl;
       funciona = false;
     }
   }

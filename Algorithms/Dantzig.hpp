@@ -38,7 +38,7 @@ protected:
             this->addEdgeCandidate(v);
     }
 
-    unordered_map<vertexIndex, weightType> algorithmExpand(int limit) override{
+    unordered_map<vertexIndex, weightType> algorithmExpand(size_t limit) override{
         vertexIndex c, t, v;
         weightType weight;  // C(c, t)
         while (this->S.size() < limit) {
@@ -56,17 +56,17 @@ public:
     Dantzig(): Algorithm<candidateType>() {}
     explicit Dantzig(Graph* _graph) : Algorithm<candidateType>(_graph) {};
     unordered_map<vertexIndex, weightType> DantzigAlgorithm(vertexIndex s){
-        return this->SingleSource(s);
+        return this->SingleSource(s, this->graph->getNumberOfVertices());
     }
 };
 
 
 class OriginalDantzig : public Dantzig<arrayType>{
 private:
-    arrayType::iterator getCandidateOfLeastWeight() override{
+    Edge* getCandidateOfLeastWeight() override{
         return min_element(candidateEdges.begin(), candidateEdges.end(), [](const auto& lhs, const auto& rhs) {
             return lhs.first < rhs.first;
-        });
+        })->second;
     }
 
     void insertCandidate(Edge* candidate) override{
@@ -82,8 +82,8 @@ public:
 
 class ImprovedDantzig : public Dantzig<mapType>{
 private:
-    mapType::iterator getCandidateOfLeastWeight() override{
-        return candidateEdges.begin();
+    Edge* getCandidateOfLeastWeight() override{
+        return candidateEdges.begin()->second;
     }
     void insertCandidate(Edge* candidate) override{
         auto weight = D[candidate->start] + candidate->weight;
