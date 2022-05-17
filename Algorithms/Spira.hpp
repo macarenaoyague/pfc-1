@@ -114,16 +114,23 @@ private:
         while (this->S.size() < limit && !candidateEdges.empty()) {
             this->initializeValues(c, t, weight, this->getCandidateOfLeastWeight());
             if(this->S.find(c) != this->S.end()){
-                if (this->S.find(t) == this->S.end()) {
+                if (isUseful(t)) {
                     this->S.emplace(t);
                     this->D[t] = this->D[c] + weight;
                     if (this->S.size() == limit) break;
+                }else{
+                    aux.emplace(candidateEdges.top().second);
                 }
                 replaceUselessCandidate();
             }else{
                 aux.emplace(candidateEdges.top().second);
                 candidateEdges.pop();
             }
+        }
+
+        while(!candidateEdges.empty()){
+            aux.emplace(candidateEdges.top().second);
+            candidateEdges.pop();
         }
         lastRevision(aux);
         return D;

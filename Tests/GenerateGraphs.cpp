@@ -1,6 +1,7 @@
 #include "Util.hpp"
 #include "fstream"
-
+#include <cassert>
+#include <cmath>
 vector<vector<bool>> generateMatrixAdjacencyBoolean(int n, bool completed = true, bool directed = true){
     vector<vector<bool>> matrixAdjacencyBoolean(n, vector<bool>(n, 0));
     for(int i = 0; i < n; i++){
@@ -15,7 +16,7 @@ vector<vector<bool>> generateMatrixAdjacencyBoolean(int n, bool completed = true
   return matrixAdjacencyBoolean;
 }
 
-vector<vector<int>> generateMatrixAdjacency(int n, bool completed = true, bool directed = true){
+vector<vector<int>> generateMatrixAdjacency(int n, bool completed = true, bool directed = false){
     vector<vector<bool>> matrixAdjacencyBoolean = generateMatrixAdjacencyBoolean(n, completed, directed);
     vector<vector<int>> matrixAdjacency(n, vector<int>(n, 0));
     bool boolean;
@@ -25,8 +26,11 @@ vector<vector<int>> generateMatrixAdjacency(int n, bool completed = true, bool d
         for(int j = 0; j < n; j++){
             boolean = matrixAdjacencyBoolean[i][j];
             if (boolean) {
-                if(!directed) matrixAdjacency[i][j] = matrixAdjacency[j][i] = (rand()%1000)*seedFunction;
-                else matrixAdjacency[i][j] = (rand()%1000)*seedFunction;
+                if(!directed) {
+                    matrixAdjacency[i][j] = ceil((rand()%1000 + 1)*seedFunction);
+                    matrixAdjacency[j][i] = matrixAdjacency[i][j];
+                }
+                else matrixAdjacency[i][j] = (rand()%1000 + 1)*seedFunction;
             }
             else matrixAdjacency[i][j] = 0;
         }
@@ -47,8 +51,10 @@ void generateGraphs( string folder = "", int start = 10, int rate = 10, int iter
 
 int main(){
     srand(time(NULL));
-    // ofstream file("graph.txt");
-    // auto matrix = generateMatrixAdjacency(16);
-    // printMatrix(matrix, file);
-    generateGraphs("../Graphs/", 10, 5);
+    int n = 100;
+    ofstream file("../Graphs/graph.txt");
+    auto matrix = generateMatrixAdjacency(n);
+    file << n << endl;
+    printMatrix(matrix, file);
+    // generateGraphs("../Graphs/", 10, 5);
 }

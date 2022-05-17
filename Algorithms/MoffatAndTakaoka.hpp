@@ -52,10 +52,6 @@ private:
         spira->D = dantzig->D;
     }
 
-    // S = {1, ...., 12}
-    // U = V - S = {13, ..., 16}
-    // candidateEdge = U_edge = {{1, 13}, {2, 13}, {13, 14}}
-
     unordered_map<vertexIndex, weightType> FastSingleSource(vertexIndex s){
         size_t n = graph->getNumberOfVertices();
         initializeDantzig();

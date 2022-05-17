@@ -10,90 +10,86 @@ const int MAX = 10000000;
 
 // copiado de geeks for geeks
 int minDistance(vector<bool> sptSet, vector<int>& dist, int& size) {
-  int min = MAX, min_index;
-  for (int v = 0; v < size; v++)
-    if (sptSet[v] == false && dist[v] <= min) min = dist[v], min_index = v;
+    int min = MAX, min_index;
+    for (int v = 0; v < size; v++)
+        if (sptSet[v] == false && dist[v] <= min) min = dist[v], min_index = v;
 
-  return min_index;
+    return min_index;
 }
 
 vector<int> dijkstra(vector<vector<int>> graph, int src, int size) {
-  vector<int> dist(size);
-  vector<bool> sptSet(size);
-  for (int i = 0; i < size; i++) dist[i] = MAX, sptSet[i] = false;
-  dist[src] = 0;
-  for (int count = 0; count < size - 1; count++) {
-    int u = minDistance(sptSet, dist, size);
-    sptSet[u] = true;
-    for (int v = 0; v < size; v++)
-      if (!sptSet[v] && graph[u][v] && dist[u] != MAX &&
-          dist[u] + graph[u][v] < dist[v])
-        dist[v] = dist[u] + graph[u][v];
-  }
-  return dist;
+    vector<int> dist(size);
+    vector<bool> sptSet(size);
+    for (int i = 0; i < size; i++) dist[i] = MAX, sptSet[i] = false;
+    dist[src] = 0;
+    for (int count = 0; count < size - 1; count++) {
+        int u = minDistance(sptSet, dist, size);
+        sptSet[u] = true;
+        for (int v = 0; v < size; v++)
+            if (!sptSet[v] && graph[u][v] && dist[u] != MAX &&
+                dist[u] + graph[u][v] < dist[v])
+                dist[v] = dist[u] + graph[u][v];
+    }
+    return dist;
 }
 
 void readFromFile(string fileName, vector<vector<int>>& matrixAdjacency) {
-  ifstream file(fileName);
-  if (file.is_open()) {
-    int n, weight;
-    vector<int> v;
-    file >> n;
-    for (int i = 0; i < n; i++) {
-      for (int j = 0; j < n; j++) {
-        file >> weight;
-        v.emplace_back(weight);
-      }
-      matrixAdjacency.emplace_back(v);
-      v.clear();
+    ifstream file(fileName);
+    if (file.is_open()) {
+        int n, weight;
+        vector<int> v;
+        file >> n;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                file >> weight;
+                v.emplace_back(weight);
+            }
+            matrixAdjacency.emplace_back(v);
+            v.clear();
+        }
+    } else {
+        cout << "ERROR AL ABRIR ARCHIVO" << endl;
+        assert(false);
     }
-  } else {
-    cout << "ERROR AL ABRIR ARCHIVO" << endl;
-    assert(false);
-  }
 }
 
 void generateVerticesIndexes(int size, vector<int>& vertices) {
-  for (int i = 1; i <= size; i++) {
-    vertices.push_back(i);
-  }
+    for (int i = 1; i <= size; i++) {
+        vertices.push_back(i);
+    }
 }
 
-void Testing(int idx, string fileName) {
-  vector<vector<int>> matrixAdjacency;
-  vector<int> vertices;
+bool Testing(int idx, string fileName) {
+    vector<vector<int>> matrixAdjacency;
+    vector<int> vertices;
 
-  readFromFile(fileName, matrixAdjacency);
-  generateVerticesIndexes(matrixAdjacency.size(), vertices);
-  cout << "Probando i=" << vertices[idx] << endl;
-  vector<int> dist = dijkstra(matrixAdjacency, idx, vertices.size());
+    readFromFile(fileName, matrixAdjacency);
+    generateVerticesIndexes(matrixAdjacency.size(), vertices);
+    //cout << "Probando i=" << vertices[idx] << endl;
+    vector<int> dist = dijkstra(matrixAdjacency, idx, vertices.size());
 
-  Graph graph(vertices, matrixAdjacency, 0);
+    Graph graph(vertices, matrixAdjacency, 0);
 
-  OriginalDantzig dantzig1(&graph);
-  ImprovedDantzig dantzig2(&graph);
+    OriginalDantzig dantzig1(&graph);
+    ImprovedDantzig dantzig2(&graph);
 
-  OriginalSpira spira(&graph);
+    OriginalSpira spira(&graph);
 
-  MoffatAndTakaoka proposal(&graph);
-  auto dantzigAnsOriginal = dantzig1.DantzigAlgorithm(vertices[idx]);
-  auto dantzigAnsImproved = dantzig2.DantzigAlgorithm(vertices[idx]);
-  auto spiraAns = spira.SpiraAlgorithm(vertices[idx]);
-  auto proposalAns = proposal.MoffatAndTakaokaAlgorithm(vertices[idx]);
-  bool funciona = true;
-  for (int i = 0; i < vertices.size(); i++) {
-    if (dist[i] != dantzigAnsOriginal[vertices[i]] ||
-        dist[i] != dantzigAnsImproved[vertices[i]] ||
-        dist[i] != spiraAns[vertices[i]] ||
-        dist[i] != proposalAns[vertices[i]]) {
-      cout << vertices[i] << ": " << dist[i] << "!=" << proposalAns[vertices[i]] << endl;
-      funciona = false;
+    MoffatAndTakaoka proposal(&graph);
+    auto dantzigAnsOriginal = dantzig1.DantzigAlgorithm(vertices[idx]);
+    auto dantzigAnsImproved = dantzig2.DantzigAlgorithm(vertices[idx]);
+    auto spiraAns = spira.SpiraAlgorithm(vertices[idx]);
+    auto proposalAns = proposal.MoffatAndTakaokaAlgorithm(vertices[idx]);
+    bool funciona = true;
+    for (int i = 0; i < vertices.size(); i++) {
+        if (dist[i] != dantzigAnsOriginal[vertices[i]] ||
+            dist[i] != dantzigAnsImproved[vertices[i]] ||
+            dist[i] != spiraAns[vertices[i]] ||
+            dist[i] != proposalAns[vertices[i]]) {
+            cout << vertices[i] << ": " << dist[i] << "!=" << proposalAns[vertices[i]] << endl;
+            funciona = false;
+        }
     }
-  }
 
-  if (funciona)
-    cout << "******** SUCCESS";
-  else
-    cout << "******** NO SUCCESS";
-  cout << endl;
+    return funciona;
 }
