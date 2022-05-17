@@ -65,78 +65,98 @@ public:
     explicit OriginalSpira(Graph* _graph): Spira(_graph) {}
 };
 
-class ImprovedSpira : public Spira<pqType>{
+class ImprovedSpira : public Spira<mapType>{
 private:
     friend class MoffatAndTakaoka;
+    unordered_set<vertexIndex> U;
 
     Edge* getCandidateOfLeastWeight() override{
-        return candidateEdges.top().second;
-    }
-
-    void insertCandidate(Edge* candidate) override{
-        auto weight = D[candidate->start] + candidate->weight;
-        candidateEdges.emplace(weight, candidate);
-    }
-
-    Edge* getEdgeCandidate(vertexIndex s) override {
         return nullptr;
     }
 
-    void replaceUselessCandidate() override {
-        this->candidateEdges.pop();
+    void insertCandidate(Edge* candidate) override{
     }
 
-    void lastRevision(unordered_set<Edge*>& aux){
-        vertexIndex a, b;
-        while(!aux.empty()){
-            unordered_set<Edge*> temp;
-            for(auto& edge: aux){
-                a = edge->start, b = edge->end;
-                if(S.find(a) != S.end()){
-                    auto minCost = D[a] + edge->weight;
-                    if(D[b] == 0) {
-                        S.emplace(b);
-                        D[b] = minCost;
-                    }
-                    else if(D[b] > minCost) D[b] = minCost;
-                }else{
-                    temp.emplace(edge);
+    Edge* getEdgeCandidate(vertexIndex s) override {
+        Edge* edgeUseful = nullptr;
+        auto vertex = this->graph->findVertex(s);
+        auto edges = vertex->edges;
+        size_t i = this->currentUsefulEdge[s];
+        for (; i < edges.size(); ++i) {
+            if (this->U.find(edges[i]->end) != this->U.end()) {
+                edgeUseful = edges[i];
+                break;
+            }
+        }
+        this->currentUsefulEdge[s] = i;
+        return edgeUseful;
+    }
+
+    void updateCurrentUsefulEdge(vertexIndex s, bool findNext = true){
+        size_t i = this->currentUsefulEdge[s];
+        if(findNext){
+            auto vertex = this->graph->findVertex(s);
+            auto edges = vertex->edges;
+            if(i != edges.size()) this->currentUsefulEdge[s] += 1;
+        }
+        getEdgeCandidate(s);
+    }
+
+    void replaceUselessCandidate() override {
+    }
+
+    bool isCurrentUsefulEdgeNull(vertexIndex s){
+        auto vertex = this->graph->findVertex(s);
+        auto edges = vertex->edges;
+        return (currentUsefulEdge[s] == edges.size());
+    }
+
+    void procedure(vertexIndex v){
+        vertexIndex c, t;
+        weightType weight;
+        while(!isCurrentUsefulEdgeNull(v)) {
+            auto edgeCandidate = getEdgeCandidate(v);
+            if(edgeCandidate == nullptr) break;
+            initializeValues(c, t, weight, edgeCandidate);
+            auto cost = D[c] + weight;
+            if (D[t] == 0) D[t] = cost;
+            else if (D[t] > cost) {
+                D[t] = cost;
+            }
+            updateCurrentUsefulEdge(c);
+            updateCurrentUsefulEdge(t, false);
+        }
+    }
+
+    void reviewPreviousCandidates(){
+        vertexIndex c, t;
+        weightType weight;  // C(c, t)
+        for(auto& item : candidateEdges){
+            auto edgeCandidate = item.second;
+            initializeValues(c, t, weight, edgeCandidate);
+            if(isUseful(t)) {
+                auto cost = D[c] + weight;
+                if (D[t] == 0) D[t] = cost;
+                else if (D[t] > cost) {
+                    D[t] = cost;
                 }
             }
-            aux = temp;
         }
     }
 
     unordered_map<vertexIndex, weightType> algorithmExpand(size_t limit) override{
-        vertexIndex c, t;
-        weightType weight;  // C(c, t)
-        unordered_set<Edge*> aux;
-        while (this->S.size() < limit && !candidateEdges.empty()) {
-            this->initializeValues(c, t, weight, this->getCandidateOfLeastWeight());
-            if(this->S.find(c) != this->S.end()){
-                if (isUseful(t)) {
-                    this->S.emplace(t);
-                    this->D[t] = this->D[c] + weight;
-                    if (this->S.size() == limit) break;
-                }else{
-                    aux.emplace(candidateEdges.top().second);
-                }
-                replaceUselessCandidate();
-            }else{
-                aux.emplace(candidateEdges.top().second);
-                candidateEdges.pop();
-            }
+        reviewPreviousCandidates();
+        for(auto& s : this->S){
+            procedure(s);
         }
-
-        while(!candidateEdges.empty()){
-            aux.emplace(candidateEdges.top().second);
-            candidateEdges.pop();
+        for(auto& u : this->U){
+            procedure(u);
         }
-        lastRevision(aux);
         return D;
     }
 public:
-    ImprovedSpira() : Spira<pqType>() {}
-    explicit ImprovedSpira(Graph* _graph, pqType& Uedges): Spira<pqType>(_graph, Uedges) {}
+    ImprovedSpira() : Spira<mapType>() {}
+    explicit ImprovedSpira(Graph* _graph, unordered_set<vertexIndex>& setU): Spira<mapType>(_graph), U(setU){}
+    //explicit ImprovedSpira(Graph* _graph, pqType& Uedges): Spira<pqType>(_graph, Uedges) {}
 };
 #endif  // PFC_PROJECT_SPIRA_H
