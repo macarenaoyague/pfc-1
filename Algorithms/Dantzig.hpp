@@ -1,7 +1,6 @@
-#ifndef PFC_PROJECT_DANTZIG_H
-#define PFC_PROJECT_DANTZIG_H
-
+#pragma once
 #include "Algorithm.hpp"
+
 #include <algorithm>
 
 template<typename candidateType>
@@ -55,9 +54,6 @@ protected:
 public:
     Dantzig(): Algorithm<candidateType>() {}
     explicit Dantzig(Graph* _graph) : Algorithm<candidateType>(_graph) {};
-    unordered_map<vertexIndex, weightType> DantzigAlgorithm(vertexIndex s){
-        return this->SingleSource(s, this->graph->getNumberOfVertices());
-    }
 };
 
 
@@ -77,6 +73,9 @@ private:
 public:
     OriginalDantzig()= default;
     explicit OriginalDantzig(Graph* graph): Dantzig<arrayType>(graph){}
+    string getAlgorithmName() override{
+        return "Original Dantzig Algorithm";
+    }
 };
 
 
@@ -92,6 +91,7 @@ private:
 public:
     ImprovedDantzig()= default;
     explicit ImprovedDantzig(Graph* graph): Dantzig<mapType>(graph){}
-
+    string getAlgorithmName() override{
+        return "Improved Dantzig Algorithm";
+    }
 };
-#endif  // PFC_PROJECT_DANTZIG_H

@@ -1,9 +1,7 @@
-#ifndef PFC_PROJECT_GRAPH_H
-#define PFC_PROJECT_GRAPH_H
+#pragma once
+#include "Vertex.hpp"
 
 #include <cassert>
-
-#include "Vertex.hpp"
 
 class Graph {
 private:
@@ -13,9 +11,9 @@ public:
     explicit Graph(): mappedEdges(false) {}
     explicit Graph(bool _mappedEdges = true): mappedEdges(_mappedEdges) {}
 
-    explicit Graph(vector<vertexIndex> vertices,
-          vector<vector<weightType>> matrixAdjacency, weightType nullValue,
-          bool _mappedEdges = true): mappedEdges(_mappedEdges) {
+    explicit Graph(vector<vertexIndex>& vertices,
+          vector<vector<weightType>>& matrixAdjacency, weightType nullValue,
+          bool directed = false, bool _mappedEdges = true): mappedEdges(_mappedEdges) {
         if (!vertices.empty() && vertices.size() == matrixAdjacency.size()) {
             size_t rows = matrixAdjacency.size();
             size_t columns = matrixAdjacency[0].size();
@@ -29,10 +27,13 @@ public:
             weightType w;
             for (int i = 0; i < rows; i++) {
                 u = vertices[i];
-                for (int j = 0; j < columns; j++) {
+                for (int j = directed ? 0 : i + 1; j < columns; j++) {
                     v = vertices[j];
                     w = matrixAdjacency[i][j];
-                    if (w != nullValue) insertEdge(u, v, w);
+                    if (w != nullValue) {
+                        insertEdge(u, v, w);
+                        if(!directed) insertEdge(v, u, w);
+                    }
                 }
             }
         }
@@ -94,5 +95,3 @@ public:
         V.clear();
     }
 };
-
-#endif  // PFC_PROJECT_GRAPH_H

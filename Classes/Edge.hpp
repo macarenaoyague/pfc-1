@@ -1,6 +1,4 @@
-#ifndef PFC_PROJECT_EDGE_H
-#define PFC_PROJECT_EDGE_H
-
+#pragma once
 #include "Global.hpp"
 
 class Edge {
@@ -18,5 +16,3 @@ public:
         return other.start == start && other.end == end;
     }
 };
-
-#endif  // PFC_PROJECT_EDGE_H

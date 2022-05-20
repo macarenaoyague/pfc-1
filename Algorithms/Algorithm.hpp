@@ -1,7 +1,5 @@
-#ifndef PFC_PROJECT_ALGORITHM_HPP
-#define PFC_PROJECT_ALGORITHM_HPP
-
-#include "../Classes/Graph.hpp"
+#pragma once
+#include "Graph.hpp"
 
 #include <queue>
 
@@ -10,10 +8,18 @@ using arrayType = vector<pairType>;
 using mapType = multimap<weightType, Edge*>;
 using pqType = priority_queue<pairType, arrayType, greater<>>;
 
+class BaseAlgorithm{
+public:
+    BaseAlgorithm()= default;
+    virtual unordered_map<vertexIndex, weightType> executeAlgorithm(vertexIndex s) = 0;
+    virtual string getAlgorithmName() = 0;
+    virtual ~BaseAlgorithm() = default;
+};
+
 class MoffatAndTakaoka;
 
 template <typename candidateType>
-class Algorithm{
+class Algorithm : public BaseAlgorithm{
 protected:
     friend class MoffatAndTakaoka;
 
@@ -63,11 +69,18 @@ protected:
 public:
     Algorithm() : graph(nullptr){}
     explicit Algorithm(Graph* _graph) : graph(_graph){
-        graph->sortAdjacencyList();
         setDefaultValues();
     }
     explicit Algorithm(Graph* _graph, pqType& Uedges) : graph(_graph), candidateEdges(Uedges){
     }
-};
 
-#endif //PFC_PROJECT_ALGORITHM_HPP
+    unordered_map<vertexIndex, weightType> executeAlgorithm(vertexIndex s) override{
+        return SingleSource(s, graph->getNumberOfVertices());
+    }
+
+    ~Algorithm() override{
+        S.clear();
+        D.clear();
+        currentUsefulEdge.clear();
+    }
+};

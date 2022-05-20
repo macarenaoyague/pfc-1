@@ -1,95 +1,35 @@
-
+#pragma once
+#include "Dantzig.hpp"
+#include "Spira.hpp"
+#include "MoffatAndTakaoka.hpp"
+#include "Util.hpp"
+#include "Tester.hpp"
 #include <cstdlib>
 #include <fstream>
-#include "../Algorithms/Dantzig.hpp"
-#include "../Algorithms/Spira.hpp"
-#include "../Algorithms/MoffatAndTakaoka.hpp"
+#include <chrono>
+#include <thread>
 
-#include "Util.hpp"
-const int MAX = 10000000;
-
-// copiado de geeks for geeks
-int minDistance(vector<bool> sptSet, vector<int>& dist, int& size) {
-    int min = MAX, min_index;
-    for (int v = 0; v < size; v++)
-        if (sptSet[v] == false && dist[v] <= min) min = dist[v], min_index = v;
-
-    return min_index;
-}
-
-vector<int> dijkstra(vector<vector<int>> graph, int src, int size) {
-    vector<int> dist(size);
-    vector<bool> sptSet(size);
-    for (int i = 0; i < size; i++) dist[i] = MAX, sptSet[i] = false;
-    dist[src] = 0;
-    for (int count = 0; count < size - 1; count++) {
-        int u = minDistance(sptSet, dist, size);
-        sptSet[u] = true;
-        for (int v = 0; v < size; v++)
-            if (!sptSet[v] && graph[u][v] && dist[u] != MAX &&
-                dist[u] + graph[u][v] < dist[v])
-                dist[v] = dist[u] + graph[u][v];
-    }
-    return dist;
-}
-
-void readFromFile(string fileName, vector<vector<int>>& matrixAdjacency) {
-    ifstream file(fileName);
-    if (file.is_open()) {
-        int n, weight;
-        vector<int> v;
-        file >> n;
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                file >> weight;
-                v.emplace_back(weight);
-            }
-            matrixAdjacency.emplace_back(v);
-            v.clear();
-        }
-    } else {
-        cout << "ERROR AL ABRIR ARCHIVO" << endl;
-        assert(false);
-    }
-}
-
-void generateVerticesIndexes(int size, vector<int>& vertices) {
-    for (int i = 1; i <= size; i++) {
-        vertices.push_back(i);
-    }
-}
-
-bool Testing(int idx, string fileName) {
+void UnitTest(string filename) {
+    int n;
     vector<vector<int>> matrixAdjacency;
     vector<int> vertices;
-
-    readFromFile(fileName, matrixAdjacency);
+    readFromFile(filename, n, matrixAdjacency);
     generateVerticesIndexes(matrixAdjacency.size(), vertices);
-    //cout << "Probando i=" << vertices[idx] << endl;
-    vector<int> dist = dijkstra(matrixAdjacency, idx, vertices.size());
+    Graph* graph = createGraph(vertices, matrixAdjacency);
 
-    Graph graph(vertices, matrixAdjacency, 0);
-
-    OriginalDantzig dantzig1(&graph);
-    ImprovedDantzig dantzig2(&graph);
-
-    OriginalSpira spira(&graph);
-
-    MoffatAndTakaoka proposal(&graph);
-    auto dantzigAnsOriginal = dantzig1.DantzigAlgorithm(vertices[idx]);
-    auto dantzigAnsImproved = dantzig2.DantzigAlgorithm(vertices[idx]);
-    auto spiraAns = spira.SpiraAlgorithm(vertices[idx]);
-    auto proposalAns = proposal.MoffatAndTakaokaAlgorithm(vertices[idx]);
-    bool funciona = true;
-    for (int i = 0; i < vertices.size(); i++) {
-        if (dist[i] != dantzigAnsOriginal[vertices[i]] ||
-            dist[i] != dantzigAnsImproved[vertices[i]] ||
-            dist[i] != spiraAns[vertices[i]] ||
-            dist[i] != proposalAns[vertices[i]]) {
-            cout << vertices[i] << ": " << dist[i] << "!=" << proposalAns[vertices[i]] << endl;
-            funciona = false;
+    for(int i = 0; i < n; ++i){
+        int idx = i;
+        vector<int> dist = dijkstra(matrixAdjacency, idx, vertices.size());
+        vector<BaseAlgorithm*> algorithms{new OriginalDantzig(graph), // new ImprovedDantzig(graph),
+                                          new OriginalSpira(graph), new MoffatAndTakaoka(graph)};
+        for(auto & algorithm : algorithms){
+            auto result = algorithm->executeAlgorithm(vertices[idx]);
+            if(!equalResults(vertices, dist, result)){
+                cout << "FAIL " <<  algorithm->getAlgorithmName() << ": idx = " << vertices[idx] << "\n";
+            }
+            delete algorithm;
         }
     }
 
-    return funciona;
+    delete graph;
 }

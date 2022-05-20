@@ -1,16 +1,16 @@
-#ifndef PFC_PROJECT_MOFFATANDTAKAOKA_HPP
-#define PFC_PROJECT_MOFFATANDTAKAOKA_HPP
-
+#pragma once
 #include "Dantzig.hpp"
 #include "Spira.hpp"
+
 #include <cmath>
 
-class MoffatAndTakaoka {
+class MoffatAndTakaoka : public BaseAlgorithm {
 private:
     Graph *graph;
     unordered_set<vertexIndex> V;
     ImprovedDantzig *dantzig;
     ImprovedSpira *spira;
+    pqType pq;
 
     unordered_set<vertexIndex> getSetU(){
         unordered_set<vertexIndex> U;
@@ -24,16 +24,31 @@ private:
         dantzig = new ImprovedDantzig(graph);
     }
 
+    void generateUedges(unordered_set<vertexIndex> setU){
+        auto S = dantzig->S;
+        for(auto& s: S) {
+            for (auto &u: setU) {
+                auto edge = graph->findEdge(s, u);
+                if(edge != nullptr) pq.push({dantzig->D[s] + edge->weight, edge});
+            }
+        }
+
+        for(auto& u1: setU){
+            for(auto& u2: setU){
+                if(u1 != u2){
+                    auto edge = graph->findEdge(u1, u2);
+                    if(edge != nullptr) pq.push({dantzig->D[u1] + edge->weight, edge});
+                }
+            }
+        }
+    }
+
     void initializeSpira(){
         auto setU = getSetU();
-        spira = new ImprovedSpira(graph, setU);
+        generateUedges(setU);
+        spira = new ImprovedSpira(graph, pq);
         spira->S = dantzig->S;
         spira->D = dantzig->D;
-        spira->candidateEdges = dantzig->candidateEdges;
-        spira->currentUsefulEdge = dantzig->currentUsefulEdge;
-        /*for(auto& v : V){
-            spira->currentUsefulEdge[v] = 0;
-        }*/
     }
 
     unordered_map<vertexIndex, weightType> FastSingleSource(vertexIndex s){
@@ -46,13 +61,20 @@ private:
 
 public:
     MoffatAndTakaoka()=default;
-    explicit MoffatAndTakaoka(Graph* _graph): graph(_graph), V(_graph->getVertexIndices()){
-
+    explicit MoffatAndTakaoka(Graph* _graph): graph(_graph), V(_graph->getVertexIndices()),
+                                                dantzig(nullptr), spira(nullptr){
     }
 
-    unordered_map<vertexIndex, weightType> MoffatAndTakaokaAlgorithm(vertexIndex s){
+    unordered_map<vertexIndex, weightType> executeAlgorithm(vertexIndex s) override{
         return FastSingleSource(s);
     }
-};
 
-#endif // PFC_PROJECT_MOFFATANDTAKAOKA_HPP
+    string getAlgorithmName() override{
+        return "Moffat and Takaoka Algorithm";
+    }
+
+    ~MoffatAndTakaoka() override{
+        delete spira;
+        delete dantzig;
+    }
+};

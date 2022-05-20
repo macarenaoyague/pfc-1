@@ -1,6 +1,4 @@
-#ifndef PFC_PROJECT_GLOBAL_H
-#define PFC_PROJECT_GLOBAL_H
-
+#pragma once
 #include <algorithm>
 #include <iostream>
 #include <map>
@@ -11,5 +9,3 @@ using namespace std;
 
 typedef int vertexIndex;
 typedef int weightType;
-
-#endif  // PFC_PROJECT_GLOBAL_H

@@ -1,5 +1,4 @@
-#ifndef PFC_PROJECT_VERTEX_H
-#define PFC_PROJECT_VERTEX_H
+#pragma once
 #include "Edge.hpp"
 
 class Vertex {
@@ -39,5 +38,3 @@ public:
         edges.clear();
     }
 };
-
-#endif  // PFC_PROJECT_VERTEX_H
