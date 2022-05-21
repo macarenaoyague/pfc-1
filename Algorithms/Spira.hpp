@@ -67,6 +67,8 @@ class ImprovedSpira : public Spira<pqType>{
 private:
     friend class MoffatAndTakaoka;
 
+    unordered_set<vertexIndex> U;
+
     Edge* getCandidateOfLeastWeight() override{
         return candidateEdges.top().second;
     }
@@ -77,61 +79,55 @@ private:
     }
 
     Edge* getEdgeCandidate(vertexIndex s) override {
-        return nullptr;
+        Edge* edge = nullptr;
+        auto vertex = this->graph->findVertex(s);
+        auto edges = vertex->edges;
+        size_t i = this->currentUsefulEdge[s];
+        
+        
+        // if(i != edges.size()) edge = edges[i++];
+        // this->currentUsefulEdge[s] = i;
+        // return edge;
+        
+        while (i < edges.size()) {
+            edge = edges[i++];
+            auto t = edge->end;
+            if(this->S.find(t) == this->S.end() && 
+                this->U.find(t) != this->U.end()) break;
+        }
+
+        this->currentUsefulEdge[s] = i;
+
+        if (i != edges.size()) return edge;
+        else return nullptr;
+        
     }
 
     void replaceUselessCandidate() override {
+        auto it = this->candidateEdges.top();
+        vertexIndex c = it.second->start;
         this->candidateEdges.pop();
-    }
-
-    void lastRevision(unordered_set<Edge*>& aux){
-        vertexIndex a, b;
-        while(!aux.empty()){
-            unordered_set<Edge*> temp;
-            for(auto& edge: aux){
-                a = edge->start, b = edge->end;
-                if(S.find(a) != S.end()){
-                    auto minCost = D[a] + edge->weight;
-                    if(D[b] == 0) {
-                        S.emplace(b);
-                        D[b] = minCost;
-                    }
-                    else if(D[b] > minCost) D[b] = minCost;
-                }else{
-                    temp.emplace(edge);
-                }
-            }
-            aux = temp;
+        if (this->U.find(c) != this->U.end()) {
+            this->addEdgeCandidate(c);
         }
     }
 
     unordered_map<vertexIndex, weightType> algorithmExpand(size_t limit) override{
-        vertexIndex c, t;
+        vertexIndex c, t, v;
         weightType weight;  // C(c, t)
-        unordered_set<Edge*> aux;
-        while (this->S.size() < limit && !candidateEdges.empty()) {
+        int uSize = U.size();
+        while (this->S.size() < uSize) {
             this->initializeValues(c, t, weight, this->getCandidateOfLeastWeight());
-            if(this->S.find(c) != this->S.end()){
-                if (isUseful(t)) {
-                    this->S.emplace(t);
-                    this->D[t] = this->D[c] + weight;
-                    if (this->S.size() == limit) break;
-                }else{
-                    aux.emplace(candidateEdges.top().second);
-                }
-                replaceUselessCandidate();
-            }else{
-                aux.emplace(candidateEdges.top().second);
-                candidateEdges.pop();
+            if (this->S.find(t) == this->S.end() && 
+                this->U.find(t) != this->U.end()) {
+                this->S.emplace(t);
+                this->D[t] = this->D[c] + weight;
+                if (this->S.size() == uSize) break;
+                this->addEdgeCandidate(t);
             }
+            replaceUselessCandidate();
         }
-
-        while(!candidateEdges.empty()){
-            aux.emplace(candidateEdges.top().second);
-            candidateEdges.pop();
-        }
-        lastRevision(aux);
-        return D;
+        return this->D;
     }
 public:
     ImprovedSpira() : Spira<pqType>() {}

@@ -1,5 +1,5 @@
 #pragma once
-#include "Graph.hpp"
+#include "../Classes/Graph.hpp"
 
 template<typename T>
 class Tester{

@@ -1,5 +1,5 @@
 #pragma once
-#include "Graph.hpp"
+#include "../Classes/Graph.hpp"
 
 #include <queue>
 
