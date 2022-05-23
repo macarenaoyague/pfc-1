@@ -23,7 +23,7 @@ protected:
 
     void replaceUselessCandidates() {
         vector<vertexIndex> insertCandidatesUsefulFromV;
-        erase_if(this->candidateEdges, [this, &insertCandidatesUsefulFromV](auto& item) -> bool{
+        erase_if(*(this->candidateEdges), [this, &insertCandidatesUsefulFromV](auto& item) -> bool{
             vertexIndex t = item.second->end;
             if(!this->isUseful(t)){
                 vertexIndex v = item.second->start;
@@ -60,14 +60,14 @@ public:
 class OriginalDantzig : public Dantzig<arrayType>{
 private:
     Edge* getCandidateOfLeastWeight() override{
-        return min_element(candidateEdges.begin(), candidateEdges.end(), [](const auto& lhs, const auto& rhs) {
+        return min_element(candidateEdges->begin(), candidateEdges->end(), [](const auto& lhs, const auto& rhs) {
             return lhs.first < rhs.first;
         })->second;
     }
 
     void insertCandidate(Edge* candidate) override{
         auto weight = D[candidate->start] + candidate->weight;
-        candidateEdges.emplace_back(weight, candidate);
+        candidateEdges->emplace_back(weight, candidate);
     }
 
 public:
@@ -82,11 +82,11 @@ public:
 class ImprovedDantzig : public Dantzig<mapType>{
 private:
     Edge* getCandidateOfLeastWeight() override{
-        return candidateEdges.begin()->second;
+        return candidateEdges->begin()->second;
     }
     void insertCandidate(Edge* candidate) override{
         auto weight = D[candidate->start] + candidate->weight;
-        candidateEdges.emplace(weight, candidate);
+        candidateEdges->emplace(weight, candidate);
     }
 public:
     ImprovedDantzig()= default;

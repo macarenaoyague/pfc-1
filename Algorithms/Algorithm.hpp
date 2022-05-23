@@ -27,7 +27,7 @@ protected:
     unordered_set<vertexIndex> S;
     unordered_map<vertexIndex, weightType> D;
     unordered_map<vertexIndex, size_t> currentUsefulEdge;
-    candidateType candidateEdges;
+    candidateType* candidateEdges;
 
     bool isUseful(vertexIndex t) { return S.find(t) == S.end(); }
 
@@ -70,8 +70,10 @@ public:
     Algorithm() : graph(nullptr){}
     explicit Algorithm(Graph* _graph) : graph(_graph){
         setDefaultValues();
+        candidateEdges = new candidateType();
     }
-    explicit Algorithm(Graph* _graph, pqType& Uedges) : graph(_graph), candidateEdges(Uedges){
+    explicit Algorithm(Graph* _graph, pqType*& Uedges) : graph(_graph), candidateEdges(Uedges){
+        this->candidateEdges = Uedges;
     }
 
     unordered_map<vertexIndex, weightType> executeAlgorithm(vertexIndex s) override{

@@ -6,20 +6,22 @@ class Spira : public Algorithm<candidateType>{
 protected:
     virtual void replaceUselessCandidate() = 0;
 public:
-    Spira(): Algorithm<candidateType>() {}
-    explicit Spira(Graph* _graph) : Algorithm<candidateType>(_graph) {}
-    explicit Spira(Graph* _graph, pqType& Uedges) : Algorithm<candidateType>(_graph, Uedges) {}
+    Spira(): Algorithm<candidateType>() {
+    }
+    explicit Spira(Graph* _graph) : Algorithm<candidateType>(_graph) {
+    }
+    explicit Spira(Graph* _graph, pqType*& Uedges) : Algorithm<candidateType>(_graph, Uedges) {}
 };
 
 class OriginalSpira : public Spira<mapType>{
 private:
     Edge* getCandidateOfLeastWeight() override{
-        return candidateEdges.begin()->second;
+        return candidateEdges->begin()->second;
     }
 
     void insertCandidate(Edge* candidate) override{
         auto weight = D[candidate->start] + candidate->weight;
-        candidateEdges.emplace(weight, candidate);
+        candidateEdges->emplace(weight, candidate);
     }
 
     Edge* getEdgeCandidate(vertexIndex s) override {
@@ -33,9 +35,9 @@ private:
     }
 
     void replaceUselessCandidate() override {
-        auto it = this->candidateEdges.begin();
+        auto it = this->candidateEdges->begin();
         vertexIndex c = it->second->start;
-        this->candidateEdges.erase(it);
+        this->candidateEdges->erase(it);
         this->addEdgeCandidate(c);
     }
 
@@ -70,12 +72,12 @@ private:
     unordered_set<vertexIndex> U;
 
     Edge* getCandidateOfLeastWeight() override{
-        return candidateEdges.top().second;
+        return candidateEdges->top().second;
     }
 
     void insertCandidate(Edge* candidate) override{
         auto weight = D[candidate->start] + candidate->weight;
-        candidateEdges.emplace(weight, candidate);
+        candidateEdges->emplace(weight, candidate);
     }
 
     Edge* getEdgeCandidate(vertexIndex s) override {
@@ -104,9 +106,9 @@ private:
     }
 
     void replaceUselessCandidate() override {
-        auto it = this->candidateEdges.top();
+        auto it = this->candidateEdges->top();
         vertexIndex c = it.second->start;
-        this->candidateEdges.pop();
+        this->candidateEdges->pop();
         if (this->U.find(c) != this->U.end()) {
             this->addEdgeCandidate(c);
         }
@@ -131,7 +133,7 @@ private:
     }
 public:
     ImprovedSpira() : Spira<pqType>() {}
-    explicit ImprovedSpira(Graph* _graph, pqType& Uedges): Spira<pqType>(_graph, Uedges) {}
+    explicit ImprovedSpira(Graph* _graph, pqType*& Uedges): Spira<pqType>(_graph, Uedges) {}
     string getAlgorithmName() override{
         return "Improved Spira Algorithm";
     }

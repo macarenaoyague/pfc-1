@@ -10,7 +10,7 @@ private:
     unordered_set<vertexIndex> V;
     ImprovedDantzig *dantzig;
     ImprovedSpira *spira;
-    pqType pq;
+    pqType* pq;
 
     unordered_set<vertexIndex> getSetU(){
         unordered_set<vertexIndex> U;
@@ -25,9 +25,10 @@ private:
     }
 
     void generateUedges(unordered_set<vertexIndex> setU){
-        for (auto& edge: dantzig->candidateEdges) {
+
+        for (auto& edge: (*dantzig->candidateEdges)) {
             if (dantzig->isUseful(edge.second->end))
-                pq.push({edge.first, edge.second});
+                pq->push({edge.first, edge.second});
         }
 
         auto S = dantzig->S;
@@ -41,7 +42,7 @@ private:
                 if (dantzig->isUseful(edges[i]->end)) {
                     edgeUseful = edges[i];
                     auto weight = dantzig->D[edgeUseful->start] + edgeUseful->weight;
-                    pq.push({weight, edgeUseful});
+                    pq->push({weight, edgeUseful});
                 }
             }
         }
@@ -69,6 +70,7 @@ public:
     MoffatAndTakaoka()=default;
     explicit MoffatAndTakaoka(Graph* _graph): graph(_graph), V(_graph->getVertexIndices()),
                                                 dantzig(nullptr), spira(nullptr){
+        pq = new pqType();
     }
 
     unordered_map<vertexIndex, weightType> executeAlgorithm(vertexIndex s) override{
