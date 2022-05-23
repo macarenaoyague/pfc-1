@@ -25,7 +25,6 @@ void UnitTest(string filename) {
                                           new OriginalSpira(graph), new MoffatAndTakaoka(graph)};
         vector<float> time;
         for(auto & algorithm : algorithms){
-
             auto start = chrono::system_clock::now();
             auto result = algorithm->executeAlgorithm(vertices[idx]);
             auto end = chrono::system_clock::now();
@@ -37,11 +36,11 @@ void UnitTest(string filename) {
             }
             delete algorithm;
         }
-        for (int j = 0; j < 3; j++) executionTime[j] += time[j];
+        for (int j = 0; j < executionTime.size(); j++) executionTime[j] += time[j];
     }
 
-    for (int j = 0; j < 3; j++) {
-        cout << executionTime[j] << endl;
+    for (int i = 0; i < executionTime.size(); i++) {
+        cout << "Execution time N°" << i+1 << ": " << executionTime[i] << "ms" << endl;
     }
     
     delete graph;
