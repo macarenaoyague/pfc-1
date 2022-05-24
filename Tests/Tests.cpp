@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
     if(argc < 3) assert(false);
     int n = strtol(argv[1], NULL, 10);
     int op = strtol(argv[2], NULL, 10);
-    string folder = "/home/johan/UTEC/2022.1/PFC_I/Proyecto_1/Code/";
+    string folder = "../";
     string filename = folder + "Graphs/graph" + to_string(n) + ".bin";
     auto* graph = readGraphFromFile(filename);
 
