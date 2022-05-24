@@ -1,5 +1,5 @@
 #include <omp.h>
-#include <mpi.h>
+#include <mpi/mpi.h>
 #include <vector>
 #include <string>
 #include "Util.hpp"
@@ -20,17 +20,18 @@ int main(int argc, char** argv) {
     if(world_rank == 0){
         vector<int> nvalues = readNVertices(folder + "Graphs/nvertices.bin");
         int i, j;
-        for(int i = 0, j = 1; i < nvalues.size() && j < world_size; ++i, ++j){
+        for(i = 0, j = 1; i < nvalues.size() && j < world_size; ++i, ++j){
             MPI_Send(&nvalues[i], 1, MPI_INT, j, 601, MPI_COMM_WORLD);
         }
-        vector<double> results;
-        for(j = 1; j < world_size; ++j){
-            MPI_Recv(&sum, 1, MPI_DOUBLE, j, 601, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            results.emplace_back(sum);
-        }
+
         string algorithm = "dantzig";
         string filename = folder + "Results/" + algorithm + "Results.txt";
-        saveResults(filename, results, nvalues);
+        ofstream file(filename);
+        for(j = 1; j < world_size; ++j){
+            MPI_Recv(&sum, 1, MPI_DOUBLE, j, 601, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            file << nvalues[j-1] << " = " << sum << endl;
+        }
+        file.close();
     }else{
         MPI_Recv(&n, 1, MPI_INT, 0, 601, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         string filename = folder + "Graphs/graph" + to_string(n) + ".bin";
