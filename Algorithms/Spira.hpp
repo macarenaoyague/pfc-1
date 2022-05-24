@@ -44,12 +44,12 @@ private:
     unordered_map<vertexIndex, weightType> algorithmExpand(size_t limit) override{
         vertexIndex c, t, v;
         weightType weight;  // C(c, t)
-        while (this->S.size() < limit) {
+        while (this->S->size() < limit) {
             this->initializeValues(c, t, weight, this->getCandidateOfLeastWeight());
-            if (this->S.find(t) == this->S.end()) {
-                this->S.emplace(t);
+            if (this->S->find(t) == this->S->end()) {
+                this->S->emplace(t);
                 this->D[t] = this->D[c] + weight;
-                if (this->S.size() == limit) break;
+                if (this->S->size() == limit) break;
                 this->addEdgeCandidate(t);
             }
             replaceUselessCandidate();
@@ -59,7 +59,8 @@ private:
 
 public:
     OriginalSpira() : Spira() {}
-    explicit OriginalSpira(Graph* _graph): Spira(_graph) {}
+    explicit OriginalSpira(Graph* _graph): Spira(_graph) {
+    }
     string getAlgorithmName() override{
         return "Original Spira Algorithm";
     }
@@ -94,7 +95,7 @@ private:
         while (i < edges.size()) {
             edge = edges[i++];
             auto t = edge->end;
-            if(this->S.find(t) == this->S.end() && 
+            if(this->S->find(t) == this->S->end() && 
                 this->U.find(t) != this->U.end()) break;
         }
 
@@ -118,13 +119,13 @@ private:
         vertexIndex c, t, v;
         weightType weight;  // C(c, t)
         int uSize = U.size();
-        while (this->S.size() < uSize) {
+        while (this->S->size() < uSize) {
             this->initializeValues(c, t, weight, this->getCandidateOfLeastWeight());
-            if (this->S.find(t) == this->S.end() && 
+            if (this->S->find(t) == this->S->end() && 
                 this->U.find(t) != this->U.end()) {
-                this->S.emplace(t);
+                this->S->emplace(t);
                 this->D[t] = this->D[c] + weight;
-                if (this->S.size() == uSize) break;
+                if (this->S->size() == uSize) break;
                 this->addEdgeCandidate(t);
             }
             replaceUselessCandidate();

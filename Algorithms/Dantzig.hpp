@@ -40,11 +40,11 @@ protected:
     unordered_map<vertexIndex, weightType> algorithmExpand(size_t limit) override{
         vertexIndex c, t, v;
         weightType weight;  // C(c, t)
-        while (this->S.size() < limit) {
+        while (this->S->size() < limit) {
             this->initializeValues(c, t, weight, this->getCandidateOfLeastWeight());
-            this->S.emplace(t);
+            this->S->emplace(t);
             this->D[t] = this->D[c] + weight;
-            if (this->S.size() == limit) break;
+            if (this->S->size() == limit) break;
             this->addEdgeCandidate(t);
             replaceUselessCandidates();
         }
@@ -72,7 +72,8 @@ private:
 
 public:
     OriginalDantzig()= default;
-    explicit OriginalDantzig(Graph* graph): Dantzig<arrayType>(graph){}
+    explicit OriginalDantzig(Graph* graph): Dantzig<arrayType>(graph) {
+    }
     string getAlgorithmName() override{
         return "Original Dantzig Algorithm";
     }

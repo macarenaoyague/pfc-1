@@ -24,15 +24,15 @@ protected:
     friend class MoffatAndTakaoka;
 
     Graph* graph;
-    unordered_set<vertexIndex> S;
+    unordered_set<vertexIndex>* S;
     unordered_map<vertexIndex, weightType> D;
     unordered_map<vertexIndex, size_t> currentUsefulEdge;
     candidateType* candidateEdges;
 
-    bool isUseful(vertexIndex t) { return S.find(t) == S.end(); }
+    bool isUseful(vertexIndex t) { return S->find(t) == S->end(); }
 
     void setDefaultValues() {
-        S.clear();
+        //S->clear();
         for (auto index : graph->getVertexIndices()) {
             D[index] = 0;
             currentUsefulEdge[index] = 0;
@@ -41,7 +41,7 @@ protected:
 
     unordered_map<vertexIndex, weightType>  SingleSource(vertexIndex s, size_t n){
         assert(this->graph->findVertex(s) != nullptr);
-        S.emplace(s);
+        S->emplace(s);
         D[s] = 0;
         addEdgeCandidate(s);
         return algorithmExpand(n);
@@ -67,13 +67,17 @@ protected:
     virtual Edge* getEdgeCandidate(vertexIndex s) = 0;
 
 public:
-    Algorithm() : graph(nullptr){}
+    Algorithm() : graph(nullptr) {
+        S = new unordered_set<vertexIndex>();
+    }
     explicit Algorithm(Graph* _graph) : graph(_graph){
         setDefaultValues();
         candidateEdges = new candidateType();
+        S = new unordered_set<vertexIndex>();
     }
     explicit Algorithm(Graph* _graph, pqType*& Uedges) : graph(_graph), candidateEdges(Uedges){
         this->candidateEdges = Uedges;
+        S = new unordered_set<vertexIndex>();
     }
 
     unordered_map<vertexIndex, weightType> executeAlgorithm(vertexIndex s) override{
@@ -81,7 +85,7 @@ public:
     }
 
     ~Algorithm() override{
-        S.clear();
+        //S->clear();
         D.clear();
         currentUsefulEdge.clear();
     }

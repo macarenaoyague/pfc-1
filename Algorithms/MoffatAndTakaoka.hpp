@@ -15,7 +15,7 @@ private:
     unordered_set<vertexIndex> getSetU(){
         unordered_set<vertexIndex> U;
         for(auto& v : V){
-            if(dantzig->S.find(v) == dantzig->S.end()) U.emplace(v);
+            if(dantzig->S->find(v) == dantzig->S->end()) U.emplace(v);
         }
         return U;
     }
@@ -24,7 +24,7 @@ private:
         dantzig = new ImprovedDantzig(graph);
     }
 
-    void generateUedges(unordered_set<vertexIndex> setU){
+    void generateUedges(){
 
         for (auto& edge: (*dantzig->candidateEdges)) {
             if (dantzig->isUseful(edge.second->end))
@@ -33,7 +33,7 @@ private:
 
         auto S = dantzig->S;
         
-        for(auto& s: S) {
+        for(auto& s: (*S)) {
             auto vertex = this->graph->findVertex(s);
             auto edges = vertex->edges;
             size_t i = dantzig->currentUsefulEdge[s];
@@ -51,7 +51,7 @@ private:
 
     void initializeSpira(){
         auto setU = getSetU();
-        generateUedges(setU);
+        generateUedges();
         spira = new ImprovedSpira(graph, pq);
         spira->D = dantzig->D;
         spira->currentUsefulEdge = dantzig->currentUsefulEdge;
