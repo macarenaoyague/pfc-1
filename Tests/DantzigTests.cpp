@@ -1,5 +1,4 @@
-#include <omp.h>
-#include <mpi/mpi.h>
+#include <mpi.h>
 #include <vector>
 #include <string>
 #include "Util.hpp"
@@ -36,34 +35,14 @@ int main(int argc, char** argv) {
         MPI_Recv(&n, 1, MPI_INT, 0, 601, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         string filename = folder + "Graphs/graph" + to_string(n) + ".bin";
         auto* graph = readGraphFromFile(filename);
-        int chunk = n / thread_count;
-        if(chunk >= 20){
-            int i;
-            double sum_temp = 0.0;
+        for (int i = 0; i < n; ++i) {
             double start, end;
-            #pragma omp parallel num_threads(thread_count) private(i, start, end) shared(sum_temp)
-            {
-                #pragma omp for schedule(dynamic, chunk) reduction(+:sum_temp)
-                for(i = 0; i < n; ++i){
-                    BaseAlgorithm* algorithm = new OriginalDantzig(graph);
-                    start = omp_get_wtime();
-                    algorithm->executeAlgorithm(i);
-                    end = omp_get_wtime();
-                    sum_temp += end - start;
-                    delete algorithm;
-                }
-            }
-            sum = sum_temp;
-        }else {
-            for (int i = 0; i < n; ++i) {
-                double start, end;
-                BaseAlgorithm* algorithm = new OriginalDantzig(graph);
-                start = MPI_Wtime();
-                algorithm->executeAlgorithm(i);
-                end = MPI_Wtime();
-                sum += end - start;
-                delete algorithm;
-            }
+            BaseAlgorithm* algorithm = new OriginalDantzig(graph);
+            start = MPI_Wtime();
+            algorithm->executeAlgorithm(i);
+            end = MPI_Wtime();
+            sum += end - start;
+            delete algorithm;
         }
         MPI_Send(&sum, 1, MPI_DOUBLE, 0, 601, MPI_COMM_WORLD);
         cout << "n = " << n << " -> completado" << endl;
