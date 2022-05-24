@@ -2,7 +2,7 @@
 #include <vector>
 #include <string>
 #include "Util.hpp"
-#include "../Algorithms/Dantzig.hpp"
+#include "../../Algorithms/Dantzig.hpp"
 
 using namespace std;
 
