@@ -13,3 +13,4 @@ moving2:
 	mv testing.out ../../
 
 khipu: compile moving2
+	cp dantzig.sh ../../dantzig.sh
