@@ -66,6 +66,7 @@ int main(int argc, char** argv) {
             }
         }
         MPI_Send(&sum, 1, MPI_DOUBLE, 0, 601, MPI_COMM_WORLD);
+        cout << "n = " << n << " -> completado" << endl;
     }
     MPI_Finalize();
 }
