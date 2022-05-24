@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
         vector<int> nvalues = readNVertices(folder + "Graphs/nvertices.bin");
         int i, j;
         for(int i = 0, j = 1; i < nvalues.size() && j < world_size; ++i, ++j){
-            MPI_Send(&nvalues[1], 1, MPI_INT, j, 601, MPI_COMM_WORLD);
+            MPI_Send(&nvalues[i], 1, MPI_INT, j, 601, MPI_COMM_WORLD);
         }
         vector<double> results;
         for(j = 1; j < world_size; ++j){
@@ -39,11 +39,11 @@ int main(int argc, char** argv) {
         if(chunk >= 20){
             int i;
             double sum_temp = 0.0;
-            #pragma omp parallel num_threads(thread_count) private(i) shared(sum_temp)
+            double start, end;
+            #pragma omp parallel num_threads(thread_count) private(i, start, end) shared(sum_temp)
             {
                 #pragma omp for schedule(dynamic, chunk) reduction(+:sum_temp)
                 for(i = 0; i < n; ++i){
-                    double start, end;
                     BaseAlgorithm* algorithm = new OriginalDantzig(graph);
                     start = omp_get_wtime();
                     algorithm->executeAlgorithm(i);
