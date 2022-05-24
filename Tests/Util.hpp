@@ -5,12 +5,12 @@
 #include <cassert>
 #include <algorithm>
 #include <iterator>
+#include "../Classes/Graph.hpp"
 const int MAX = 10000000;
 using namespace std;
 
-void printVector(vector<int>& vector, ostream& out = cout) {
-    for (auto item : vector) out << item << " ";
-    out << "\n";
+void printVector(vector<int>& vector, ostream& out = cout, const string& delimiter=" ") {
+    for (auto item : vector) out << item << delimiter;
 }
 
 void printMatrix(vector<vector<int>>& matrix, ostream& out = cout) {
@@ -66,14 +66,13 @@ void readFromFile(string filename, int& n, vector<vector<int>>& matrixAdjacency)
     }
 }
 
-vector<int> readNVertices(){
-    string filename = "Graphs/nvertices.bin";
+vector<int> readNVertices(const string& filename){
     ifstream file(filename);
     if(file.is_open()) {
         vector<int> r;
-        int n;
+        short n;
         while (!file.eof()) {
-            file >> n;
+            file.read((char*)&n, sizeof(short));
             r.emplace_back(n);
         }
         return r;
@@ -87,6 +86,15 @@ Graph* createGraph(vector<vertexIndex>& vertices, vector<vector<weightType>>& ma
     return graph;
 }
 
+Graph* readGraphFromFile(string filename){
+    int n;
+    vector<vector<int>> matrixAdjacency;
+    vector<int> vertices;
+    readFromFile(filename, n, matrixAdjacency);
+    generateVerticesIndexes(matrixAdjacency.size(), vertices);
+    return createGraph(vertices, matrixAdjacency);
+}
+
 bool equalResults(vector<vertexIndex>& vertices, vector<int>& dist,
                      unordered_map<vertexIndex, weightType>& result){
     bool ok = true;
@@ -97,4 +105,16 @@ bool equalResults(vector<vertexIndex>& vertices, vector<int>& dist,
         }
     }
     return ok;
+}
+
+void saveResults(const string& filename, vector<double>& results, vector<int> nvertices){
+    ofstream file(filename);
+    if(file.is_open()) {
+        for (int i = 0; i < results.size(); i++) {
+            file << nvertices[i] << " = " << results[i] << endl;
+        }
+        file.close();
+    }else{
+        cout << "NO SE PUDO ABRIR EL ARCHIVO " << endl;
+    }
 }
