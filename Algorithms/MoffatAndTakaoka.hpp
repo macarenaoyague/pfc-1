@@ -26,9 +26,11 @@ private:
 
     void generateUedges(){
 
+        arrayType elements;
         for (auto& edge: (*dantzig->candidateEdges)) {
             if (dantzig->isUseful(edge.second->end))
-                pq->push({edge.first, edge.second});
+                elements.push_back({edge.first, edge.second});
+                // pq->push({edge.first, edge.second});
         }
 
         auto S = dantzig->S;
@@ -36,16 +38,19 @@ private:
         for(auto& s: (*S)) {
             auto vertex = this->graph->findVertex(s);
             auto edges = vertex->edges;
-            size_t i = dantzig->currentUsefulEdge[s];
+            size_t i = (*(dantzig->currentUsefulEdge))[s];
             Edge* edgeUseful = nullptr;
             for (; i < edges.size(); ++i) {
                 if (dantzig->isUseful(edges[i]->end)) {
                     edgeUseful = edges[i];
                     auto weight = (*(dantzig->D))[edgeUseful->start] + edgeUseful->weight;
-                    pq->push({weight, edgeUseful});
+                    elements.push_back({weight, edgeUseful});
+                    //pq->push({weight, edgeUseful});
                 }
             }
         }
+        
+        pq = new pqType(elements.begin(), elements.end());
 
     }
 
@@ -70,7 +75,6 @@ public:
     MoffatAndTakaoka()=default;
     explicit MoffatAndTakaoka(Graph* _graph): graph(_graph), V(_graph->getVertexIndices()),
                                                 dantzig(nullptr), spira(nullptr){
-        pq = new pqType();
     }
 
     unordered_map<vertexIndex, weightType>* executeAlgorithm(vertexIndex s) override{

@@ -26,16 +26,16 @@ protected:
     Graph* graph;
     unordered_set<vertexIndex>* S;
     unordered_map<vertexIndex, weightType>* D;
-    unordered_map<vertexIndex, size_t> currentUsefulEdge;
+    unordered_map<vertexIndex, size_t>* currentUsefulEdge;
     candidateType* candidateEdges;
 
     bool isUseful(vertexIndex t) { return S->find(t) == S->end(); }
 
     void setDefaultValues() {
-        //S->clear();
+        S->clear();
         for (auto index : graph->getVertexIndices()) {
             (*D)[index] = 0;
-            currentUsefulEdge[index] = 0;
+            (*currentUsefulEdge)[index] = 0;
         }
     }
 
@@ -71,18 +71,21 @@ public:
         this->candidateEdges = new candidateType();
         this->S = new unordered_set<vertexIndex>();
         this->D = new unordered_map<vertexIndex, weightType>();
+        this->currentUsefulEdge = new unordered_map<vertexIndex, size_t>();
     }
     explicit Algorithm(Graph* _graph) : graph(_graph){
         
         this->candidateEdges = new candidateType();
         this->S = new unordered_set<vertexIndex>();
         this->D = new unordered_map<vertexIndex, weightType>();
+        this->currentUsefulEdge = new unordered_map<vertexIndex, size_t>();
         setDefaultValues();
     }
     explicit Algorithm(Graph* _graph, pqType*& Uedges) : graph(_graph), candidateEdges(Uedges){
         this->candidateEdges = Uedges;
         this->S = new unordered_set<vertexIndex>();
         this->D = new unordered_map<vertexIndex, weightType>();
+        this->currentUsefulEdge = new unordered_map<vertexIndex, size_t>();
     }
 
     unordered_map<vertexIndex, weightType>* executeAlgorithm(vertexIndex s) override{
@@ -90,8 +93,8 @@ public:
     }
 
     ~Algorithm() override{
-        //S->clear();
-        //D->clear();
-        currentUsefulEdge.clear();
+        S->clear();
+        D->clear();
+        currentUsefulEdge->clear();
     }
 };

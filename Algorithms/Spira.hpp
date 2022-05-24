@@ -28,9 +28,9 @@ private:
         Edge* edgeUseful = nullptr;
         auto vertex = this->graph->findVertex(s);
         auto edges = vertex->edges;
-        size_t i = this->currentUsefulEdge[s];
+        size_t i = (*currentUsefulEdge)[s];
         if(i != edges.size()) edgeUseful = edges[i++];
-        this->currentUsefulEdge[s] = i;
+        (*currentUsefulEdge)[s] = i;
         return edgeUseful;
     }
 
@@ -85,11 +85,11 @@ private:
         Edge* edge = nullptr;
         auto vertex = this->graph->findVertex(s);
         auto edges = vertex->edges;
-        size_t i = this->currentUsefulEdge[s];
+        size_t i = (*currentUsefulEdge)[s];
         
         
         // if(i != edges.size()) edge = edges[i++];
-        // this->currentUsefulEdge[s] = i;
+        // (*(this->currentUsefulEdge))[s] = i;
         // return edge;
         
         while (i < edges.size()) {
@@ -99,7 +99,7 @@ private:
                 this->U.find(t) != this->U.end()) break;
         }
 
-        this->currentUsefulEdge[s] = i;
+        (*currentUsefulEdge)[s] = i;
 
         if (i != edges.size()) return edge;
         else return nullptr;

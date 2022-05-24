@@ -10,14 +10,14 @@ protected:
         Edge* edgeUseful = nullptr;
         auto vertex = this->graph->findVertex(s);
         auto edges = vertex->edges;
-        size_t i = this->currentUsefulEdge[s];
+        size_t i = (*(this->currentUsefulEdge))[s];
         for (; i < edges.size(); ++i) {
             if (this->isUseful(edges[i]->end)) {
                 edgeUseful = edges[i];
                 break;
             }
         }
-        this->currentUsefulEdge[s] = i;
+        (*(this->currentUsefulEdge))[s] = i;
         return edgeUseful;
     }
 
