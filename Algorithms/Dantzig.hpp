@@ -37,13 +37,13 @@ protected:
             this->addEdgeCandidate(v);
     }
 
-    unordered_map<vertexIndex, weightType> algorithmExpand(size_t limit) override{
+    unordered_map<vertexIndex, weightType>* algorithmExpand(size_t limit) override{
         vertexIndex c, t, v;
         weightType weight;  // C(c, t)
         while (this->S->size() < limit) {
             this->initializeValues(c, t, weight, this->getCandidateOfLeastWeight());
             this->S->emplace(t);
-            this->D[t] = this->D[c] + weight;
+            (*(this->D))[t] = (*(this->D))[c] + weight;
             if (this->S->size() == limit) break;
             this->addEdgeCandidate(t);
             replaceUselessCandidates();
@@ -66,7 +66,7 @@ private:
     }
 
     void insertCandidate(Edge* candidate) override{
-        auto weight = D[candidate->start] + candidate->weight;
+        auto weight = (*D)[candidate->start] + candidate->weight;
         candidateEdges->emplace_back(weight, candidate);
     }
 
@@ -86,7 +86,7 @@ private:
         return candidateEdges->begin()->second;
     }
     void insertCandidate(Edge* candidate) override{
-        auto weight = D[candidate->start] + candidate->weight;
+        auto weight = (*D)[candidate->start] + candidate->weight;
         candidateEdges->emplace(weight, candidate);
     }
 public:

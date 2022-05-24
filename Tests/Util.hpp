@@ -88,11 +88,11 @@ Graph* createGraph(vector<vertexIndex>& vertices, vector<vector<weightType>>& ma
 }
 
 bool equalResults(vector<vertexIndex>& vertices, vector<int>& dist,
-                     unordered_map<vertexIndex, weightType>& result){
+                     unordered_map<vertexIndex, weightType>*& result){
     bool ok = true;
     for(int i = 0; i < vertices.size(); i++){
-        if(dist[i] != result[vertices[i]]) {
-            cout << "to " << vertices[i] << ": " << dist[i] << "!=" << result[vertices[i]] << "\n";
+        if(dist[i] != (*result)[vertices[i]]) {
+            cout << "to " << vertices[i] << ": " << dist[i] << "!=" << (*result)[vertices[i]] << "\n";
             ok = false;
         }
     }

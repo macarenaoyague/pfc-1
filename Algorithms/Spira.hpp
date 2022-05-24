@@ -20,7 +20,7 @@ private:
     }
 
     void insertCandidate(Edge* candidate) override{
-        auto weight = D[candidate->start] + candidate->weight;
+        auto weight = (*D)[candidate->start] + candidate->weight;
         candidateEdges->emplace(weight, candidate);
     }
 
@@ -41,14 +41,14 @@ private:
         this->addEdgeCandidate(c);
     }
 
-    unordered_map<vertexIndex, weightType> algorithmExpand(size_t limit) override{
+    unordered_map<vertexIndex, weightType>* algorithmExpand(size_t limit) override{
         vertexIndex c, t, v;
         weightType weight;  // C(c, t)
         while (this->S->size() < limit) {
             this->initializeValues(c, t, weight, this->getCandidateOfLeastWeight());
             if (this->S->find(t) == this->S->end()) {
                 this->S->emplace(t);
-                this->D[t] = this->D[c] + weight;
+                (*D)[t] = (*D)[c] + weight;
                 if (this->S->size() == limit) break;
                 this->addEdgeCandidate(t);
             }
@@ -77,7 +77,7 @@ private:
     }
 
     void insertCandidate(Edge* candidate) override{
-        auto weight = D[candidate->start] + candidate->weight;
+        auto weight = (*D)[candidate->start] + candidate->weight;
         candidateEdges->emplace(weight, candidate);
     }
 
@@ -115,7 +115,7 @@ private:
         }
     }
 
-    unordered_map<vertexIndex, weightType> algorithmExpand(size_t limit) override{
+    unordered_map<vertexIndex, weightType>* algorithmExpand(size_t limit) override{
         vertexIndex c, t, v;
         weightType weight;  // C(c, t)
         int uSize = U.size();
@@ -124,7 +124,7 @@ private:
             if (this->S->find(t) == this->S->end() && 
                 this->U.find(t) != this->U.end()) {
                 this->S->emplace(t);
-                this->D[t] = this->D[c] + weight;
+                (*D)[t] = (*D)[c] + weight;
                 if (this->S->size() == uSize) break;
                 this->addEdgeCandidate(t);
             }

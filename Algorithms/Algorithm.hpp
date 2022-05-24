@@ -11,7 +11,7 @@ using pqType = priority_queue<pairType, arrayType, greater<>>;
 class BaseAlgorithm{
 public:
     BaseAlgorithm()= default;
-    virtual unordered_map<vertexIndex, weightType> executeAlgorithm(vertexIndex s) = 0;
+    virtual unordered_map<vertexIndex, weightType>* executeAlgorithm(vertexIndex s) = 0;
     virtual string getAlgorithmName() = 0;
     virtual ~BaseAlgorithm() = default;
 };
@@ -25,7 +25,7 @@ protected:
 
     Graph* graph;
     unordered_set<vertexIndex>* S;
-    unordered_map<vertexIndex, weightType> D;
+    unordered_map<vertexIndex, weightType>* D;
     unordered_map<vertexIndex, size_t> currentUsefulEdge;
     candidateType* candidateEdges;
 
@@ -34,15 +34,15 @@ protected:
     void setDefaultValues() {
         //S->clear();
         for (auto index : graph->getVertexIndices()) {
-            D[index] = 0;
+            (*D)[index] = 0;
             currentUsefulEdge[index] = 0;
         }
     }
 
-    unordered_map<vertexIndex, weightType>  SingleSource(vertexIndex s, size_t n){
+    unordered_map<vertexIndex, weightType>* SingleSource(vertexIndex s, size_t n){
         assert(this->graph->findVertex(s) != nullptr);
         S->emplace(s);
-        D[s] = 0;
+        (*D)[s] = 0;
         addEdgeCandidate(s);
         return algorithmExpand(n);
     }
@@ -63,30 +63,35 @@ protected:
 
     virtual void insertCandidate(Edge* candidate) = 0;
     virtual Edge* getCandidateOfLeastWeight() = 0;
-    virtual unordered_map<vertexIndex, weightType> algorithmExpand(size_t limit) = 0;
+    virtual unordered_map<vertexIndex, weightType>* algorithmExpand(size_t limit) = 0;
     virtual Edge* getEdgeCandidate(vertexIndex s) = 0;
 
 public:
     Algorithm() : graph(nullptr) {
-        S = new unordered_set<vertexIndex>();
+        this->candidateEdges = new candidateType();
+        this->S = new unordered_set<vertexIndex>();
+        this->D = new unordered_map<vertexIndex, weightType>();
     }
     explicit Algorithm(Graph* _graph) : graph(_graph){
+        
+        this->candidateEdges = new candidateType();
+        this->S = new unordered_set<vertexIndex>();
+        this->D = new unordered_map<vertexIndex, weightType>();
         setDefaultValues();
-        candidateEdges = new candidateType();
-        S = new unordered_set<vertexIndex>();
     }
     explicit Algorithm(Graph* _graph, pqType*& Uedges) : graph(_graph), candidateEdges(Uedges){
         this->candidateEdges = Uedges;
-        S = new unordered_set<vertexIndex>();
+        this->S = new unordered_set<vertexIndex>();
+        this->D = new unordered_map<vertexIndex, weightType>();
     }
 
-    unordered_map<vertexIndex, weightType> executeAlgorithm(vertexIndex s) override{
+    unordered_map<vertexIndex, weightType>* executeAlgorithm(vertexIndex s) override{
         return SingleSource(s, graph->getNumberOfVertices());
     }
 
     ~Algorithm() override{
         //S->clear();
-        D.clear();
+        //D->clear();
         currentUsefulEdge.clear();
     }
 };

@@ -41,7 +41,7 @@ private:
             for (; i < edges.size(); ++i) {
                 if (dantzig->isUseful(edges[i]->end)) {
                     edgeUseful = edges[i];
-                    auto weight = dantzig->D[edgeUseful->start] + edgeUseful->weight;
+                    auto weight = (*(dantzig->D))[edgeUseful->start] + edgeUseful->weight;
                     pq->push({weight, edgeUseful});
                 }
             }
@@ -58,7 +58,7 @@ private:
         spira->U = setU;
     }
 
-    unordered_map<vertexIndex, weightType> FastSingleSource(vertexIndex s){
+    unordered_map<vertexIndex, weightType>* FastSingleSource(vertexIndex s){
         size_t n = graph->getNumberOfVertices();
         initializeDantzig();
         dantzig->SingleSource(s, n - n/log2(n));
@@ -73,7 +73,7 @@ public:
         pq = new pqType();
     }
 
-    unordered_map<vertexIndex, weightType> executeAlgorithm(vertexIndex s) override{
+    unordered_map<vertexIndex, weightType>* executeAlgorithm(vertexIndex s) override{
         return FastSingleSource(s);
     }
 

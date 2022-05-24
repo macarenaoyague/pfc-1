@@ -10,7 +10,7 @@ public:
         algorithm = new T(graph);
     }
     
-    unordered_map<vertexIndex, weightType> executeAlgorithm(vertexIndex s){
+    unordered_map<vertexIndex, weightType>* executeAlgorithm(vertexIndex s){
         return algorithm->executeAlgorithm(s);
     }
 
