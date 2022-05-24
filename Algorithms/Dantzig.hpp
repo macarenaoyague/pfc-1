@@ -10,20 +10,20 @@ protected:
         Edge* edgeUseful = nullptr;
         auto vertex = this->graph->findVertex(s);
         auto edges = vertex->edges;
-        size_t i = this->currentUsefulEdge[s];
+        size_t i = (*(this->currentUsefulEdge))[s];
         for (; i < edges.size(); ++i) {
             if (this->isUseful(edges[i]->end)) {
                 edgeUseful = edges[i];
                 break;
             }
         }
-        this->currentUsefulEdge[s] = i;
+        (*(this->currentUsefulEdge))[s] = i;
         return edgeUseful;
     }
 
     void replaceUselessCandidates() {
         vector<vertexIndex> insertCandidatesUsefulFromV;
-        erase_if(this->candidateEdges, [this, &insertCandidatesUsefulFromV](auto& item) -> bool{
+        erase_if(*(this->candidateEdges), [this, &insertCandidatesUsefulFromV](auto& item) -> bool{
             vertexIndex t = item.second->end;
             if(!this->isUseful(t)){
                 vertexIndex v = item.second->start;
@@ -37,14 +37,14 @@ protected:
             this->addEdgeCandidate(v);
     }
 
-    unordered_map<vertexIndex, weightType> algorithmExpand(size_t limit) override{
+    unordered_map<vertexIndex, weightType>* algorithmExpand(size_t limit) override{
         vertexIndex c, t, v;
         weightType weight;  // C(c, t)
-        while (this->S.size() < limit) {
+        while (this->S->size() < limit) {
             this->initializeValues(c, t, weight, this->getCandidateOfLeastWeight());
-            this->S.emplace(t);
-            this->D[t] = this->D[c] + weight;
-            if (this->S.size() == limit) break;
+            this->S->emplace(t);
+            (*(this->D))[t] = (*(this->D))[c] + weight;
+            if (this->S->size() == limit) break;
             this->addEdgeCandidate(t);
             replaceUselessCandidates();
         }
@@ -60,19 +60,20 @@ public:
 class OriginalDantzig : public Dantzig<arrayType>{
 private:
     Edge* getCandidateOfLeastWeight() override{
-        return min_element(candidateEdges.begin(), candidateEdges.end(), [](const auto& lhs, const auto& rhs) {
+        return min_element(candidateEdges->begin(), candidateEdges->end(), [](const auto& lhs, const auto& rhs) {
             return lhs.first < rhs.first;
         })->second;
     }
 
     void insertCandidate(Edge* candidate) override{
-        auto weight = D[candidate->start] + candidate->weight;
-        candidateEdges.emplace_back(weight, candidate);
+        auto weight = (*D)[candidate->start] + candidate->weight;
+        candidateEdges->emplace_back(weight, candidate);
     }
 
 public:
     OriginalDantzig()= default;
-    explicit OriginalDantzig(Graph* graph): Dantzig<arrayType>(graph){}
+    explicit OriginalDantzig(Graph* graph): Dantzig<arrayType>(graph) {
+    }
     string getAlgorithmName() override{
         return "Original Dantzig Algorithm";
     }
@@ -82,11 +83,11 @@ public:
 class ImprovedDantzig : public Dantzig<mapType>{
 private:
     Edge* getCandidateOfLeastWeight() override{
-        return candidateEdges.begin()->second;
+        return candidateEdges->begin()->second;
     }
     void insertCandidate(Edge* candidate) override{
-        auto weight = D[candidate->start] + candidate->weight;
-        candidateEdges.emplace(weight, candidate);
+        auto weight = (*D)[candidate->start] + candidate->weight;
+        candidateEdges->emplace(weight, candidate);
     }
 public:
     ImprovedDantzig()= default;

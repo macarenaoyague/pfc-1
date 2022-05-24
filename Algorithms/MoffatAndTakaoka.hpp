@@ -10,12 +10,12 @@ private:
     unordered_set<vertexIndex> V;
     ImprovedDantzig *dantzig;
     ImprovedSpira *spira;
-    pqType pq;
+    pqType* pq;
 
     unordered_set<vertexIndex> getSetU(){
         unordered_set<vertexIndex> U;
         for(auto& v : V){
-            if(dantzig->S.find(v) == dantzig->S.end()) U.emplace(v);
+            if(dantzig->S->find(v) == dantzig->S->end()) U.emplace(v);
         }
         return U;
     }
@@ -24,40 +24,46 @@ private:
         dantzig = new ImprovedDantzig(graph);
     }
 
-    void generateUedges(unordered_set<vertexIndex> setU){
-        for (auto& edge: dantzig->candidateEdges) {
+    void generateUedges(){
+
+        arrayType elements;
+        for (auto& edge: (*dantzig->candidateEdges)) {
             if (dantzig->isUseful(edge.second->end))
-                pq.push({edge.first, edge.second});
+                elements.push_back({edge.first, edge.second});
+                // pq->push({edge.first, edge.second});
         }
 
         auto S = dantzig->S;
         
-        for(auto& s: S) {
+        for(auto& s: (*S)) {
             auto vertex = this->graph->findVertex(s);
             auto edges = vertex->edges;
-            size_t i = dantzig->currentUsefulEdge[s];
+            size_t i = (*(dantzig->currentUsefulEdge))[s];
             Edge* edgeUseful = nullptr;
             for (; i < edges.size(); ++i) {
                 if (dantzig->isUseful(edges[i]->end)) {
                     edgeUseful = edges[i];
-                    auto weight = dantzig->D[edgeUseful->start] + edgeUseful->weight;
-                    pq.push({weight, edgeUseful});
+                    auto weight = (*(dantzig->D))[edgeUseful->start] + edgeUseful->weight;
+                    elements.push_back({weight, edgeUseful});
+                    //pq->push({weight, edgeUseful});
                 }
             }
         }
+        
+        pq = new pqType(elements.begin(), elements.end());
 
     }
 
     void initializeSpira(){
         auto setU = getSetU();
-        generateUedges(setU);
+        generateUedges();
         spira = new ImprovedSpira(graph, pq);
         spira->D = dantzig->D;
         spira->currentUsefulEdge = dantzig->currentUsefulEdge;
         spira->U = setU;
     }
 
-    unordered_map<vertexIndex, weightType> FastSingleSource(vertexIndex s){
+    unordered_map<vertexIndex, weightType>* FastSingleSource(vertexIndex s){
         size_t n = graph->getNumberOfVertices();
         initializeDantzig();
         dantzig->SingleSource(s, n - n/log2(n));
@@ -71,7 +77,7 @@ public:
                                                 dantzig(nullptr), spira(nullptr){
     }
 
-    unordered_map<vertexIndex, weightType> executeAlgorithm(vertexIndex s) override{
+    unordered_map<vertexIndex, weightType>* executeAlgorithm(vertexIndex s) override{
         return FastSingleSource(s);
     }
 
