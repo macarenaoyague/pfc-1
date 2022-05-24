@@ -107,7 +107,7 @@ bool equalResults(vector<vertexIndex>& vertices, vector<int>& dist,
     return ok;
 }
 
-void saveResults(const string& filename, vector<double>& results, vector<int> nvertices){
+void saveResults(const string& filename, vector<double>& results, vector<int>& nvertices){
     ofstream file(filename);
     if(file.is_open()) {
         for (int i = 0; i < results.size(); i++) {
