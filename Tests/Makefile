@@ -8,4 +8,4 @@ spira:
 	bash SpiraTests.sh
 
 moffatAndTakaoka:
-	bash moffatAndTakaoka.sh
+	bash MoffatAndTakaokaTests.sh
