@@ -1,6 +1,5 @@
-#include "Tests/Testing.hpp"
+#include "Tests/UnitTest.hpp"
 
 int main() {
-    UnitTest("Graphs/graph244.bin");
-    return 0;
+    UnitTest("Graphs/graph200.bin");
 }

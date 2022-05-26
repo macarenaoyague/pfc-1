@@ -8,6 +8,20 @@ using namespace std;
 
 using weightType = short;
 
+vector<int> readNVertices(const string& filename){
+    ifstream file(filename);
+    if(file.is_open()) {
+        vector<int> r;
+        short n;
+        while (!file.eof()) {
+            file.read((char*)&n, sizeof(short));
+            r.emplace_back(n);
+        }
+        return r;
+    }
+    else assert(false);
+}
+
 vector<vector<bool>> generateMatrixAdjacencyBoolean(int n, bool completed = true, bool directed = true){
     if(completed){
         vector<vector<bool>> matrixAdjacencyBoolean(n, vector<bool>(n, 1));
@@ -64,11 +78,11 @@ void saveMatrixAdjacency(vector<vector<weightType>>& matrix, string filename, bo
 
 }
 
-void generateGraphs(string folder = "", int start = 10, int end = 500, float rate = 1.5, int iterations = 10){
-    ofstream file(folder + "nvertices.bin", ios::binary);
-    for(int i = 0, n = start; i < iterations; i++, n*=rate){
-        if(i == iterations - 1) n = end;
-        file << n;
+void generateGraphs(string folder = "", int start = 10, int end = 500, int step = 1){
+    assert(start <= end);
+    ofstream file(folder + "nvertices.bin", ios::binary | ios::app);
+    for(short n = start; n <= end; n+=step){
+        file.write((char*)&n, sizeof(short));
         string filename = folder + "graph" + to_string(n) + ".bin";
         auto matrix = generateMatrixAdjacency(n);
         saveMatrixAdjacency(matrix, filename);
@@ -78,11 +92,10 @@ void generateGraphs(string folder = "", int start = 10, int end = 500, float rat
 
 int main(){
     srand(time(NULL));
-    //generateGraphs("../Graphs/");
-    ifstream file("../cmake-build-debug/Graphs/graph10.bin", ios::binary);
-    if(file.is_open()){
-        int n;
-        file.read((char *)& n, sizeof(short));
-        cout << n;
-    }else cout << "fail";
+    generateGraphs("../Graphs/", 10, 990, 10);
+    generateGraphs("../Graphs/", 1000, 5000, 200);
+    auto v = readNVertices("../Graphs/nvertices.bin");
+    for(auto& item : v){
+        cout << item << ", ";
+    }
 }
