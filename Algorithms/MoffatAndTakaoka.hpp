@@ -4,6 +4,7 @@
 
 #include <cmath>
 #include <algorithm>
+#include <boost/heap/fibonacci_heap.hpp>
 
 class MoffatAndTakaoka : public BaseAlgorithm {
 private:
@@ -177,7 +178,7 @@ private:
     }
 
 public:
-    MoffatAndTakaokaIEEE()=default;
+    MoffatAndTakaokaIEEE() = default;
     explicit MoffatAndTakaokaIEEE(Graph* _graph) : Algorithm<arrayType>(_graph) {
 
     }
