@@ -88,10 +88,6 @@ public:
         this->currentUsefulEdge = new unordered_map<vertexIndex, size_t>();
     }
 
-    unordered_map<vertexIndex, weightType>* executeAlgorithm(vertexIndex s) override{
-        return SingleSource(s, graph->getNumberOfVertices());
-    }
-
     ~Algorithm() override{
         S->clear();
         D->clear();

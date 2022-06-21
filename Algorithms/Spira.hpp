@@ -11,6 +11,9 @@ public:
     explicit Spira(Graph* _graph) : Algorithm<candidateType>(_graph) {
     }
     explicit Spira(Graph* _graph, pqType*& Uedges) : Algorithm<candidateType>(_graph, Uedges) {}
+    unordered_map<vertexIndex, weightType>* executeAlgorithm(vertexIndex s) override{
+        return this->SingleSource(s, this->graph->getNumberOfVertices());
+    }
 };
 
 class OriginalSpira : public Spira<mapType>{

@@ -53,7 +53,10 @@ protected:
 
 public:
     Dantzig(): Algorithm<candidateType>() {}
-    explicit Dantzig(Graph* _graph) : Algorithm<candidateType>(_graph) {};
+    explicit Dantzig(Graph* _graph) : Algorithm<candidateType>(_graph) {}
+    unordered_map<vertexIndex, weightType>* executeAlgorithm(vertexIndex s) override{
+        return this->SingleSource(s, this->graph->getNumberOfVertices());
+    }
 };
 
 

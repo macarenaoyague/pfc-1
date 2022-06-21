@@ -101,25 +101,27 @@ private:
         Edge* edgeUseful = nullptr;
         auto vertex = this->graph->findVertex(s);
         auto edges = vertex->edges;
-        bool isPurgued = false;
-        while (!isPurgued) {
-            size_t i = (*currentUsefulEdge)[s];
-            if(i != edges.size()) edgeUseful = edges[i++];
-            (*currentUsefulEdge)[s] = i;
+        size_t i = (*(this->currentUsefulEdge))[s];
+        for (; i < edges.size(); ++i) {
+            if (purged.find(edges[i]->end) == purged.end()) {
+                edgeUseful = edges[i++];
+                break;
+            }
         }
+        (*(this->currentUsefulEdge))[s] = i;
         return edgeUseful;
     }
 
     void insertCandidate(Edge* candidate) override {
         auto weight = (*D)[candidate->start] + candidate->weight;
         candidateEdges->push_back({weight, candidate}); 
-        push_heap(candidateEdges->begin(), candidateEdges->end());
+        push_heap(candidateEdges->begin(), candidateEdges->end(), std::greater<>{});
     }
 
     Edge* getCandidateOfLeastWeight() override {
-        assert(candidateEdges->size() != 0);
+        assert(!candidateEdges->empty());
         Edge* top = (candidateEdges->front()).second;
-        pop_heap(candidateEdges->begin(), candidateEdges->end());
+        pop_heap(candidateEdges->begin(), candidateEdges->end(), std::greater<>{});
         candidateEdges->pop_back();
         return top;
     }
@@ -136,49 +138,56 @@ private:
                 addEdgeCandidate(t);
             }
         }
+
+        return this->D; // necessary to avoid warning
     }
 
     void cleanUpHeap() {
         purged = *S;
-        erase_if(*(this->candidateEdges), [this](auto& item) -> bool{
+        erase_if(*(this->candidateEdges), [this](auto& item) -> bool {
             vertexIndex c, t;
             weightType weight;
             this->initializeValues(c, t, weight, item.second);
             if(S->find(t) != S->end()){
                 auto edge = getEdgeCandidate(c);
-                if(edge){
-                    item.second = edge;
-                    item.first = this->getDvector()[edge->start] + edge->weight;
-                    return false;
-                }
-                return true;
+                if(edge == nullptr) return true;
+                item.second = edge;
+                item.first = (*(this->D))[edge->start] + edge->weight;
+                return false;
             }
             return false;
         });
-        make_heap(this->candidateEdges->begin(), this->candidateEdges->end());
+        make_heap(this->candidateEdges->begin(), this->candidateEdges->end(), std::greater<>{});
     }
 
-    void fastSp(vertexIndex s) {
+    unordered_map<vertexIndex, weightType>* fastSp(vertexIndex s) {
         assert(this->graph->findVertex(s) != nullptr);
         S->emplace(s);
         (*D)[s] = 0;
         purged.emplace(s);
+        addEdgeCandidate(s);
         size_t n = graph->getNumberOfVertices();
-        for (size_t k = 1; k < log2(log2(n)); k++) {
+        for (size_t k = 1; k <= log2(log2(n)); k++) {
             // n div 2**k
-            this->algorithmExpand(n - n/(pow(2, k)));
+            this->algorithmExpand(n - n/pow(2, k));
             this->cleanUpHeap();
         }
         this->algorithmExpand(n);
+        return this->D;
     }
 
 public:
-    MoffatAndTakaokaIEEE(Graph* _graph) : Algorithm<arrayType>(_graph) {
+    MoffatAndTakaokaIEEE()=default;
+    explicit MoffatAndTakaokaIEEE(Graph* _graph) : Algorithm<arrayType>(_graph) {
 
     }
 
-    unordered_map<vertexIndex, weightType>* getDvector() {
-        return this->D;
+    string getAlgorithmName() override {
+        return "Moffat and Takaoka Algorithm, IEEE";
+    }
+
+    unordered_map<vertexIndex, weightType>* executeAlgorithm(vertexIndex s) override{
+        return this->fastSp(s);
     }
 
 };
