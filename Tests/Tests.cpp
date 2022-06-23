@@ -14,7 +14,7 @@ BaseAlgorithm* chooseAlgorithm(int op, Graph* graph){
     BaseAlgorithm* algorithm = nullptr;
     if(op == 1) algorithm = new OriginalDantzig(graph);
     else if(op == 2) algorithm = new OriginalSpira(graph);
-    else if(op == 3) algorithm = new MoffatAndTakaoka(graph);
+    else if(op == 3) algorithm = new OriginalMoffatAndTakaoka(graph);
     return algorithm;
 }
 
@@ -25,6 +25,7 @@ string getNameOfAlgorithm(int op){
     else if(op == 3) name = "moffatAndTakaoka";
     return name;
 }
+
 int main(int argc, char** argv) {
     if(argc < 3) assert(false);
     int n = strtol(argv[1], NULL, 10);

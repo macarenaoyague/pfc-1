@@ -71,8 +71,6 @@ public:
 
 class ImprovedSpira : public Spira<pqType>{
 private:
-    friend class MoffatAndTakaoka;
-
     unordered_set<vertexIndex> U;
 
     Edge* getCandidateOfLeastWeight() override{

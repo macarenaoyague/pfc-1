@@ -16,13 +16,9 @@ public:
     virtual ~BaseAlgorithm() = default;
 };
 
-class MoffatAndTakaoka;
-
 template <typename candidateType>
 class Algorithm : public BaseAlgorithm{
 protected:
-    friend class MoffatAndTakaoka;
-
     Graph* graph;
     unordered_set<vertexIndex>* S;
     unordered_map<vertexIndex, weightType>* D;
