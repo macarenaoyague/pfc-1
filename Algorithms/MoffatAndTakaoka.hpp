@@ -6,6 +6,14 @@
 #include <algorithm>
 #include <boost/heap/fibonacci_heap.hpp>
 
+using namespace boost::heap;
+
+struct compareItem {
+    bool operator()(const pairType& lhs, const pairType& rhs) const {
+        return lhs.first > rhs.first;
+    }
+};
+
 template<typename heap>
 class MoffatAndTakaoka : public Algorithm<heap>{
 protected:
@@ -13,7 +21,7 @@ protected:
 
     virtual void push(pairType edge) = 0;
     virtual Edge* pop() = 0;
-    virtual void rearrange() = 0;
+    virtual void cleanUpHeap() = 0;
 
     Edge* getEdgeCandidate(vertexIndex s) override {
         // linked list optimizacion
@@ -35,27 +43,9 @@ protected:
         auto weight = (*(this->D))[candidate->start] + candidate->weight;
         push({weight, candidate});
     }
-    
+
     Edge* getCandidateOfLeastWeight() override {
         return pop();
-    }
-    
-    void cleanUpHeap() {
-        purged = *(this->S);
-        erase_if(*(this->candidateEdges), [this](auto& item) -> bool {
-            vertexIndex c, t;
-            weightType weight;
-            this->initializeValues(c, t, weight, item.second);
-            if(this->S->find(t) != this->S->end()){
-                auto edge = this->getEdgeCandidate(c);
-                if(edge == nullptr) return true;
-                item.second = edge;
-                item.first = (*(this->D))[edge->start] + edge->weight;
-                return false;
-            }
-            return false;
-        });
-        rearrange();
     }
 
     unordered_map<vertexIndex, weightType>* algorithmExpand(size_t limit) override {
@@ -99,7 +89,7 @@ public:
 class OriginalMoffatAndTakaoka : public MoffatAndTakaoka<arrayType>{
 private:
     void push(pairType edge) override {
-        candidateEdges->push_back(edge); 
+        candidateEdges->push_back(edge);
         push_heap(candidateEdges->begin(), candidateEdges->end(), std::greater<>{});
     }
 
@@ -110,8 +100,22 @@ private:
         candidateEdges->pop_back();
         return top;
     }
-    
-    void rearrange() override {
+
+    void cleanUpHeap() override {
+        purged = *(this->S);
+        erase_if(*(this->candidateEdges), [this](auto& item) -> bool {
+            vertexIndex c, t;
+            weightType weight;
+            this->initializeValues(c, t, weight, item.second);
+            if(this->S->find(t) != this->S->end()){
+                auto edge = this->getEdgeCandidate(c);
+                if(edge == nullptr) return true;
+                item.second = edge;
+                item.first = (*(this->D))[edge->start] + edge->weight;
+                return false;
+            }
+            return false;
+        });
         make_heap(this->candidateEdges->begin(), this->candidateEdges->end(), std::greater<>{});
     }
 
@@ -132,25 +136,50 @@ public:
 template<typename boostHeap>
 class BoostMoffatAndTakaoka : public MoffatAndTakaoka<boostHeap>{
 private:
-    void push(pairType edge) override {
-        this->candidateEdges->push(edge);
+    void push(pairType item) override {
+        this->candidateEdges->push(item);
     }
 
     Edge* pop() override {
         if (this->candidateEdges->empty()) return nullptr;
-        Edge* top = (this->candidateEdges->top());
+        Edge* top = (this->candidateEdges->top().second);
         this->candidateEdges->pop();
         return top;
     }
-    
-    void rearrange() override {
-        
+
+    void cleanUpHeap() override {
+        this->purged = *(this->S);
+        vector<typename boostHeap::handle_type> toUpdate, toRemove;
+        vector<pairType> values;
+        vertexIndex c, t;
+        weightType weight;
+        for(auto it = this->candidateEdges->begin(); it != this->candidateEdges->end(); ++it){
+            auto item = *it;
+            this->initializeValues(c, t, weight, item.second);
+            if(this->S->find(t) != this->S->end()) {
+                auto edge = this->getEdgeCandidate(c);
+                auto handle = boostHeap::s_handle_from_iterator(it);
+                if(edge == nullptr) {
+                    toRemove.push_back(handle);
+                    return;
+                }
+                weight = (*(this->D))[edge->start] + edge->weight;
+                toUpdate.push_back(handle);
+                values.push_back({weight, edge});
+            }
+        }
+
+        for(size_t i = 0; i < toRemove.size(); ++i)
+            this->candidateEdges->erase(toRemove[i]);
+
+        for(size_t i = 0; i < toUpdate.size(); ++i)
+            this->candidateEdges->update(toUpdate[i], values[i]);
     }
 
 public:
-    OriginalMoffatAndTakaoka() : MoffatAndTakaoka<boostHeap>() {}
+    BoostMoffatAndTakaoka() : MoffatAndTakaoka<boostHeap>() {}
 
-    explicit OriginalMoffatAndTakaoka(Graph* _graph) : MoffatAndTakaoka<boostHeap>(_graph) {}
+    explicit BoostMoffatAndTakaoka(Graph* _graph) : MoffatAndTakaoka<boostHeap>(_graph) {}
 
     string getAlgorithmName() override {
         return "Moffat and Takaoka Algorithm, with Boost";
