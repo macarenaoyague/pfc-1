@@ -5,6 +5,7 @@
 #include <cmath>
 #include <algorithm>
 #include <boost/heap/fibonacci_heap.hpp>
+#include <boost/heap/binomial_heap.hpp>
 
 using namespace boost::heap;
 
@@ -149,8 +150,8 @@ private:
 
     void cleanUpHeap() override {
         this->purged = *(this->S);
-        vector<typename boostHeap::handle_type> toUpdate, toRemove;
-        vector<pairType> values;
+        vector<typename boostHeap::handle_type> toRemove;
+        vector<pair<typename boostHeap::handle_type, pairType>> toUpdate;
         vertexIndex c, t;
         weightType weight;
         for(auto it = this->candidateEdges->begin(); it != this->candidateEdges->end(); ++it){
@@ -160,12 +161,11 @@ private:
                 auto edge = this->getEdgeCandidate(c);
                 auto handle = boostHeap::s_handle_from_iterator(it);
                 if(edge == nullptr) {
-                    toRemove.push_back(handle);
+                    toRemove.emplace_back(handle);
                     return;
                 }
                 weight = (*(this->D))[edge->start] + edge->weight;
-                toUpdate.push_back(handle);
-                values.push_back({weight, edge});
+                toUpdate.emplace_back(handle, make_pair(weight, edge));
             }
         }
 
@@ -173,7 +173,7 @@ private:
             this->candidateEdges->erase(toRemove[i]);
 
         for(size_t i = 0; i < toUpdate.size(); ++i)
-            this->candidateEdges->update(toUpdate[i], values[i]);
+            this->candidateEdges->update(toUpdate[i].first, toUpdate[i].second);
     }
 
 public:

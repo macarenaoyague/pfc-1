@@ -12,14 +12,16 @@ void UnitTest(string filename) {
     readFromFile(filename, n, matrixAdjacency);
     generateVerticesIndexes(matrixAdjacency.size(), vertices);
     Graph* graph = createGraph(vertices, matrixAdjacency);
-    vector<float> executionTime = {0, 0, 0};
+    vector<float> executionTime = {0, 0, 0, 0, 0};
 
     for(int i = 0; i < n; ++i){
         int idx = i;
         vector<int> dist = dijkstra(matrixAdjacency, idx, vertices.size());
         vector<BaseAlgorithm*> algorithms{new OriginalDantzig(graph),
                                           new OriginalSpira(graph),
-                                          new OriginalMoffatAndTakaoka(graph)};
+                                          new OriginalMoffatAndTakaoka(graph),
+                                          new BoostMoffatAndTakaoka<fibonacci_heap<pairType, boost::heap::compare<compareItem>>>(graph),
+                                          new BoostMoffatAndTakaoka<binomial_heap<pairType, boost::heap::compare<compareItem>>>(graph)};
         vector<float> time;
         for(auto & algorithm : algorithms){
             auto start = chrono::system_clock::now();
