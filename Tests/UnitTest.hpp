@@ -5,21 +5,22 @@
 #include "Util.hpp"
 #include <chrono>
 
-void UnitTest(string filename) {
+void UnitTest(string filename, bool checkResults = false) {
     int n;
     vector<vector<int>> matrixAdjacency;
     vector<int> vertices;
     readFromFile(filename, n, matrixAdjacency);
     generateVerticesIndexes(matrixAdjacency.size(), vertices);
     Graph* graph = createGraph(vertices, matrixAdjacency);
-    vector<float> executionTime = {0, 0, 0, 0, 0};
-
+    vector<float> executionTime = {0, 0};
+    vector<int> dist;
+    cout << "Graph of " << n << " nodes" << endl;
     for(int i = 0; i < n; ++i){
         int idx = i;
-        vector<int> dist = dijkstra(matrixAdjacency, idx, vertices.size());
-        vector<BaseAlgorithm*> algorithms{new OriginalDantzig(graph),
-                                          new OriginalSpira(graph),
-                                          new OriginalMoffatAndTakaoka(graph),
+        if(checkResults)
+            dist = dijkstra(matrixAdjacency, idx, vertices.size());
+
+        vector<BaseAlgorithm*> algorithms{new OriginalMoffatAndTakaoka(graph),
                                           new BoostMoffatAndTakaoka<fibonacci_heap<pairType, boost::heap::compare<compareItem>>>(graph),
                                           new BoostMoffatAndTakaoka<binomial_heap<pairType, boost::heap::compare<compareItem>>>(graph)};
         vector<float> time;
@@ -30,9 +31,10 @@ void UnitTest(string filename) {
             std::chrono::duration<float,std::milli> duration = end - start;
             time.push_back(duration.count());
 
-            if(!equalResults(vertices, dist, result)){
+            if(checkResults && !equalResults(vertices, dist, result)){
                 cout << "FAIL " <<  algorithm->getAlgorithmName() << ": idx = " << vertices[idx] << "\n";
             }
+
             delete algorithm;
         }
         for (int j = 0; j < executionTime.size(); j++) executionTime[j] += time[j];
