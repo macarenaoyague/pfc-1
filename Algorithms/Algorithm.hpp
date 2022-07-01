@@ -10,6 +10,10 @@ using pqType = priority_queue<pairType, arrayType, greater<>>;
 
 class BaseAlgorithm{
 public:
+    pair<float, int> pushOperation;
+    pair<float, int> popOperation;
+    pair<float, int> cleanUpOperation;
+    
     BaseAlgorithm()= default;
     virtual unordered_map<vertexIndex, weightType>* executeAlgorithm(vertexIndex s) = 0;
     virtual string getAlgorithmName() = 0;

@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <boost/heap/fibonacci_heap.hpp>
 #include <boost/heap/binomial_heap.hpp>
+#include <chrono>
+#include <fstream>
 
 using namespace boost::heap;
 
@@ -15,6 +17,8 @@ struct compareItem {
     }
 };
 
+typedef std::chrono::time_point<std::chrono::system_clock> chronoTime;
+
 template<typename heap>
 class MoffatAndTakaoka : public Algorithm<heap>{
 protected:
@@ -23,6 +27,17 @@ protected:
     virtual void push(pairType edge) = 0;
     virtual Edge* pop() = 0;
     virtual void cleanUpHeap() = 0;
+    
+    chronoTime start() {
+        return chrono::system_clock::now();
+    }
+
+    void end(pair<float, int>& variableTime, chronoTime start) {
+        auto end_ = chrono::system_clock::now();
+        std::chrono::duration<float,std::milli> duration = end_ - start;
+        variableTime.first += duration.count();
+        variableTime.second++;
+    }
 
     Edge* getEdgeCandidate(vertexIndex s) override {
         // linked list optimizacion
@@ -80,9 +95,20 @@ protected:
         return this->D;
     }
 
+    vector<float> getTimes(){
+        return {this->pushOperation.first, this->popOperation.first, this->cleanUpOperation.first};
+    }
+
+    vector<int> getCounter(){
+        return {this->pushOperation.second, this->popOperation.second, this->cleanUpOperation.second};
+    }
+
 public:
     MoffatAndTakaoka(){}
-    MoffatAndTakaoka(Graph* _graph): Algorithm<heap>(_graph) {}
+    MoffatAndTakaoka(Graph* _graph): Algorithm<heap>(_graph) {
+        this->pushOperation.first = this->popOperation.first = this->cleanUpOperation.first = 0;
+        this->pushOperation.second = this->popOperation.second = this->cleanUpOperation.second = 0;
+    }
 };
 
 
@@ -90,19 +116,24 @@ public:
 class OriginalMoffatAndTakaoka : public MoffatAndTakaoka<arrayType>{
 private:
     void push(pairType edge) override {
+        chronoTime start = this->start();
         candidateEdges->push_back(edge);
         push_heap(candidateEdges->begin(), candidateEdges->end(), std::greater<>{});
+        this->end(this->pushOperation, start);
     }
 
     Edge* pop() override {
+        chronoTime start = this->start();
         if (candidateEdges->empty()) return nullptr;
         Edge* top = (candidateEdges->front()).second;
         pop_heap(candidateEdges->begin(), candidateEdges->end(), std::greater<>{});
         candidateEdges->pop_back();
+        this->end(this->popOperation, start);
         return top;
     }
 
     void cleanUpHeap() override {
+        chronoTime start = this->start();
         purged = *(this->S);
         erase_if(*(this->candidateEdges), [this](auto& item) -> bool {
             vertexIndex c, t;
@@ -118,6 +149,7 @@ private:
             return false;
         });
         make_heap(this->candidateEdges->begin(), this->candidateEdges->end(), std::greater<>{});
+        this->end(this->cleanUpOperation, start);
     }
 
 public:
@@ -126,7 +158,7 @@ public:
     explicit OriginalMoffatAndTakaoka(Graph* _graph) : MoffatAndTakaoka<arrayType>(_graph) {}
 
     string getAlgorithmName() override {
-        return "Moffat and Takaoka Algorithm";
+        return "Moffat&TakaokaAlgorithm";
     }
 
     unordered_map<vertexIndex, weightType>* executeAlgorithm(vertexIndex s) override{
@@ -138,17 +170,22 @@ template<typename boostHeap>
 class BoostMoffatAndTakaoka : public MoffatAndTakaoka<boostHeap>{
 private:
     void push(pairType item) override {
+        chronoTime start = this->start();
         this->candidateEdges->push(item);
+        this->end(this->pushOperation, start);
     }
 
     Edge* pop() override {
-        if (this->candidateEdges->empty()) return nullptr;
+        chronoTime start = this->start();
+        // if (this->candidateEdges->empty()) return nullptr;
         Edge* top = (this->candidateEdges->top().second);
         this->candidateEdges->pop();
+        this->end(this->popOperation, start);
         return top;
     }
 
     void cleanUpHeap() override {
+        chronoTime start = this->start();
         this->purged = *(this->S);
         vector<typename boostHeap::handle_type> toRemove;
         vector<pair<typename boostHeap::handle_type, pairType>> toUpdate;
@@ -162,7 +199,7 @@ private:
                 auto handle = boostHeap::s_handle_from_iterator(it);
                 if(edge == nullptr) {
                     toRemove.emplace_back(handle);
-                    return;
+                    continue;
                 }
                 weight = (*(this->D))[edge->start] + edge->weight;
                 toUpdate.emplace_back(handle, make_pair(weight, edge));
@@ -174,6 +211,7 @@ private:
 
         for(size_t i = 0; i < toUpdate.size(); ++i)
             this->candidateEdges->update(toUpdate[i].first, toUpdate[i].second);
+        this->end(this->cleanUpOperation, start);
     }
 
 public:
@@ -182,7 +220,7 @@ public:
     explicit BoostMoffatAndTakaoka(Graph* _graph) : MoffatAndTakaoka<boostHeap>(_graph) {}
 
     string getAlgorithmName() override {
-        return "Moffat and Takaoka Algorithm, with Boost";
+        return "Moffat&TakaokaAlgorithmBoost";
     }
 
     unordered_map<vertexIndex, weightType>* executeAlgorithm(vertexIndex s) override{
