@@ -94,15 +94,7 @@ protected:
         this->algorithmExpand(n);
         return this->D;
     }
-
-    vector<float> getTimes(){
-        return {this->pushOperation.first, this->popOperation.first, this->cleanUpOperation.first};
-    }
-
-    vector<int> getCounter(){
-        return {this->pushOperation.second, this->popOperation.second, this->cleanUpOperation.second};
-    }
-
+    
 public:
     MoffatAndTakaoka(){}
     MoffatAndTakaoka(Graph* _graph): Algorithm<heap>(_graph) {

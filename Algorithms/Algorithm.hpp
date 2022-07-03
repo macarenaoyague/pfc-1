@@ -18,6 +18,18 @@ public:
     virtual unordered_map<vertexIndex, weightType>* executeAlgorithm(vertexIndex s) = 0;
     virtual string getAlgorithmName() = 0;
     virtual ~BaseAlgorithm() = default;
+
+    vector<pair<float, int>> getOperations(){
+        return {pushOperation, popOperation, cleanUpOperation};
+    }
+    
+    vector<float> getTimes(){
+        return {this->pushOperation.first, this->popOperation.first, this->cleanUpOperation.first};
+    }
+
+    vector<int> getCounter(){
+        return {this->pushOperation.second, this->popOperation.second, this->cleanUpOperation.second};
+    }
 };
 
 template <typename candidateType>
