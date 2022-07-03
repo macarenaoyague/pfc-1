@@ -1,13 +1,8 @@
-All: compile moving
+all:
+	@echo "Mirar los comandos del makefile"
 
-compile:
-	mpic++ -std=c++2a -fopenmp Parallel/DantzigTestsParallel.cpp -o dantzig.out
+moffat:
+	bash moffat.sh
 
-moving:
-	mv dantzig.out ../
-
-moving2:
-	mv dantzig.out ../../
-
-khipu: compile moving2
-	cp dantzig.sh ../../dantzig.sh
+moffatWithBoost:
+	bash moffatWithBoost.sh
